@@ -1,0 +1,324 @@
+{
+    "items": [
+        {
+            "k": "ServerRoot",
+            "v": "\\\\NAS\\Gaming\\AssetBundlesStorage"
+        },
+        {
+            "k": "GameName",
+            "v": ""
+        },
+        {
+            "k": "AssetBundleFolder",
+            "v": ""
+        },
+        {
+            "k": "ToolsRoot",
+            "v": "\\\\NAS\\Gaming\\ToolsStorage"
+        },
+        {
+            "k": "ToolShareExp",
+            "v": "1"
+        },
+        {
+            "k": "ToolPushName",
+            "v": ""
+        },
+        {
+            "k": "ToolExp_ApkHierarchy",
+            "v": "0"
+        },
+        {
+            "k": "ToolExp_ArtReplacementTool",
+            "v": "0"
+        },
+        {
+            "k": "ToolExp_AssetbundlePushPull",
+            "v": "1"
+        },
+        {
+            "k": "ToolExp_B_Tutorial",
+            "v": "0"
+        },
+        {
+            "k": "ToolExp_PlaySchoolAPI_Common",
+            "v": "1"
+        },
+        {
+            "k": "ToolExp_PlayschoolFonts",
+            "v": "1"
+        },
+        {
+            "k": "Sel_AlphabetPopup",
+            "v": "0"
+        },
+        {
+            "k": "Exp_AlphabetPopup",
+            "v": "0"
+        },
+        {
+            "k": "Sel_ambulanceemergency",
+            "v": "0"
+        },
+        {
+            "k": "Exp_ambulanceemergency",
+            "v": "0"
+        },
+        {
+            "k": "Sel_AnimalSoundSafari",
+            "v": "0"
+        },
+        {
+            "k": "Exp_AnimalSoundSafari",
+            "v": "0"
+        },
+        {
+            "k": "Sel_avoidthecold",
+            "v": "0"
+        },
+        {
+            "k": "Exp_avoidthecold",
+            "v": "0"
+        },
+        {
+            "k": "Sel_BigLetterSmallLetter",
+            "v": "0"
+        },
+        {
+            "k": "Exp_BigLetterSmallLetter",
+            "v": "0"
+        },
+        {
+            "k": "Sel_BuildABot",
+            "v": "0"
+        },
+        {
+            "k": "Exp_BuildABot",
+            "v": "0"
+        },
+        {
+            "k": "Sel_chainsum",
+            "v": "0"
+        },
+        {
+            "k": "Exp_chainsum",
+            "v": "0"
+        },
+        {
+            "k": "Sel_CityHero",
+            "v": "0"
+        },
+        {
+            "k": "Exp_CityHero",
+            "v": "0"
+        },
+        {
+            "k": "Sel_coinhunt",
+            "v": "0"
+        },
+        {
+            "k": "Exp_coinhunt",
+            "v": "0"
+        },
+        {
+            "k": "Sel_countandcook",
+            "v": "0"
+        },
+        {
+            "k": "Exp_countandcook",
+            "v": "0"
+        },
+        {
+            "k": "Sel_electronicmaze",
+            "v": "0"
+        },
+        {
+            "k": "Exp_electronicmaze",
+            "v": "0"
+        },
+        {
+            "k": "Sel_FeedTheAnimal",
+            "v": "0"
+        },
+        {
+            "k": "Exp_FeedTheAnimal",
+            "v": "0"
+        },
+        {
+            "k": "Sel_flashcards",
+            "v": "0"
+        },
+        {
+            "k": "Exp_flashcards",
+            "v": "0"
+        },
+        {
+            "k": "Sel_GoliPizzaParty",
+            "v": "0"
+        },
+        {
+            "k": "Exp_GoliPizzaParty",
+            "v": "0"
+        },
+        {
+            "k": "Sel_healtyvsjunkfood",
+            "v": "0"
+        },
+        {
+            "k": "Exp_healtyvsjunkfood",
+            "v": "0"
+        },
+        {
+            "k": "Sel_Hopscotch",
+            "v": "0"
+        },
+        {
+            "k": "Exp_Hopscotch",
+            "v": "0"
+        },
+        {
+            "k": "Sel_Jigsaw",
+            "v": "0"
+        },
+        {
+            "k": "Exp_Jigsaw",
+            "v": "0"
+        },
+        {
+            "k": "Sel_MatchTheArrow",
+            "v": "0"
+        },
+        {
+            "k": "Exp_MatchTheArrow",
+            "v": "0"
+        },
+        {
+            "k": "Sel_NumberPairs",
+            "v": "0"
+        },
+        {
+            "k": "Exp_NumberPairs",
+            "v": "0"
+        },
+        {
+            "k": "Sel_Phonic",
+            "v": "0"
+        },
+        {
+            "k": "Exp_Phonic",
+            "v": "0"
+        },
+        {
+            "k": "Sel_playschool_common_api",
+            "v": "0"
+        },
+        {
+            "k": "Exp_playschool_common_api",
+            "v": "0"
+        },
+        {
+            "k": "Sel_Rhymes",
+            "v": "0"
+        },
+        {
+            "k": "Exp_Rhymes",
+            "v": "0"
+        },
+        {
+            "k": "Sel_SaveTheTeddy",
+            "v": "0"
+        },
+        {
+            "k": "Exp_SaveTheTeddy",
+            "v": "0"
+        },
+        {
+            "k": "Sel_shapematchexpress",
+            "v": "0"
+        },
+        {
+            "k": "Exp_shapematchexpress",
+            "v": "0"
+        },
+        {
+            "k": "Sel_snakecollect",
+            "v": "0"
+        },
+        {
+            "k": "Exp_snakecollect",
+            "v": "0"
+        },
+        {
+            "k": "Sel_SodiStuntMaster",
+            "v": "0"
+        },
+        {
+            "k": "Exp_SodiStuntMaster",
+            "v": "0"
+        },
+        {
+            "k": "Sel_sorting",
+            "v": "0"
+        },
+        {
+            "k": "Exp_sorting",
+            "v": "0"
+        },
+        {
+            "k": "Sel_swipetocolor",
+            "v": "0"
+        },
+        {
+            "k": "Exp_swipetocolor",
+            "v": "0"
+        },
+        {
+            "k": "Sel_Tap to Color",
+            "v": "0"
+        },
+        {
+            "k": "Exp_Tap to Color",
+            "v": "0"
+        },
+        {
+            "k": "Sel_unique",
+            "v": "0"
+        },
+        {
+            "k": "Exp_unique",
+            "v": "0"
+        },
+        {
+            "k": "Sel_WeightQuest",
+            "v": "0"
+        },
+        {
+            "k": "Exp_WeightQuest",
+            "v": "0"
+        },
+        {
+            "k": "Sel_Word Search",
+            "v": "0"
+        },
+        {
+            "k": "Exp_Word Search",
+            "v": "0"
+        },
+        {
+            "k": "Sel_zombieescape",
+            "v": "0"
+        },
+        {
+            "k": "Exp_zombieescape",
+            "v": "0"
+        },
+        {
+            "k": "ToolDest_PlaySchoolAPI_Common",
+            "v": "D:/UnityProjects/TugOfWar/Assets/APIs"
+        },
+        {
+            "k": "ToolDest_PlayschoolFonts",
+            "v": "D:/UnityProjects/TugOfWar/Assets/APIs"
+        }
+    ]
+}
