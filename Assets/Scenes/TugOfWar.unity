@@ -571,6 +571,8 @@ Transform:
   m_Children:
   - {fileID: 1927801644}
   - {fileID: 975830024}
+  - {fileID: 1459543726}
+  - {fileID: 1302897720}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &975830023
@@ -622,6 +624,292 @@ MonoBehaviour:
   battle: {fileID: 0}
   levelConfigs: []
   resultPanelDelay: 1.8
+--- !u!1 &1302897719
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1302897720}
+  - component: {fileID: 1302897721}
+  m_Layer: 0
+  m_Name: SoundManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1302897720
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1302897719}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 967205335}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1302897721
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1302897719}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36bd4a4832cef044e836b2085a20889c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  music:
+  - id: 1
+    clip: {fileID: 0}
+    volume: 0.6
+    loop: 1
+  - id: 2
+    clip: {fileID: 0}
+    volume: 0.6
+    loop: 1
+  - id: 3
+    clip: {fileID: 0}
+    volume: 0.6
+    loop: 1
+  - id: 4
+    clip: {fileID: 0}
+    volume: 0.6
+    loop: 1
+  - id: 5
+    clip: {fileID: 0}
+    volume: 0.6
+    loop: 1
+  - id: 6
+    clip: {fileID: 0}
+    volume: 0.6
+    loop: 1
+  sfx:
+  - id: 0
+    clips: []
+    volume: 1
+    pitchRange: {x: 1, y: 1}
+  - id: 1
+    clips: []
+    volume: 1
+    pitchRange: {x: 1, y: 1}
+  - id: 2
+    clips: []
+    volume: 1
+    pitchRange: {x: 1, y: 1}
+  - id: 3
+    clips: []
+    volume: 1
+    pitchRange: {x: 1, y: 1}
+  - id: 4
+    clips: []
+    volume: 1
+    pitchRange: {x: 1, y: 1}
+  - id: 5
+    clips: []
+    volume: 1
+    pitchRange: {x: 1, y: 1}
+  - id: 6
+    clips: []
+    volume: 1
+    pitchRange: {x: 1, y: 1}
+  - id: 7
+    clips: []
+    volume: 1
+    pitchRange: {x: 1, y: 1}
+  - id: 8
+    clips: []
+    volume: 1
+    pitchRange: {x: 1, y: 1}
+  - id: 9
+    clips: []
+    volume: 1
+    pitchRange: {x: 1, y: 1}
+  - id: 10
+    clips: []
+    volume: 1
+    pitchRange: {x: 1, y: 1}
+  - id: 11
+    clips: []
+    volume: 1
+    pitchRange: {x: 1, y: 1}
+  - id: 12
+    clips: []
+    volume: 1
+    pitchRange: {x: 1, y: 1}
+  - id: 13
+    clips: []
+    volume: 1
+    pitchRange: {x: 1, y: 1}
+  - id: 14
+    clips: []
+    volume: 1
+    pitchRange: {x: 1, y: 1}
+  - id: 15
+    clips: []
+    volume: 1
+    pitchRange: {x: 1, y: 1}
+  - id: 16
+    clips: []
+    volume: 1
+    pitchRange: {x: 1, y: 1}
+  - id: 17
+    clips: []
+    volume: 1
+    pitchRange: {x: 1, y: 1}
+  - id: 18
+    clips: []
+    volume: 1
+    pitchRange: {x: 1, y: 1}
+  - id: 19
+    clips: []
+    volume: 1
+    pitchRange: {x: 1, y: 1}
+  voices:
+  - id: 0
+    clips: []
+    runtimeKey: 
+  - id: 1
+    clips: []
+    runtimeKey: 
+  - id: 2
+    clips: []
+    runtimeKey: 
+  - id: 3
+    clips: []
+    runtimeKey: 
+  - id: 4
+    clips: []
+    runtimeKey: 
+  - id: 5
+    clips: []
+    runtimeKey: 
+  - id: 6
+    clips: []
+    runtimeKey: 
+  - id: 7
+    clips: []
+    runtimeKey: 
+  - id: 8
+    clips: []
+    runtimeKey: 
+  - id: 9
+    clips: []
+    runtimeKey: 
+  - id: 10
+    clips: []
+    runtimeKey: 
+  masterVolume: 1
+  sfxVolume: 0.9
+  voiceVolume: 1
+  sfxVoices: 10
+  duckTo: 0.55
+--- !u!1 &1459543725
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1459543726}
+  - component: {fileID: 1459543727}
+  - component: {fileID: 1459543728}
+  m_Layer: 0
+  m_Name: TugBattle
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1459543726
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1459543725}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 967205335}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1459543727
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1459543725}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 65fd991401f8e8345956a97cc29b91cb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ropeView: {fileID: 0}
+  player: {fileID: 0}
+  pet: {fileID: 0}
+  ui: {fileID: 0}
+  vfx: {fileID: 0}
+  tapBase: 2.6
+  tierMultiplier:
+  - 0.75
+  - 1
+  - 1.3
+  - 1.6
+  tierTapsPerSecond: 030000000600000009000000
+  powerPush: 28
+  powerTime: 0.7
+  powerDecayPerSecond: 14
+  powerDecayDelay: 0.6
+  nearWinRope: 62
+  finalPushRope: 70
+  rubberBand: 7
+  countdownStep: 0.75
+  endingDuration: 0.95
+--- !u!114 &1459543728
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1459543725}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9b512d0b9af33b4783fa9e96810f1bc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  worldCamera: {fileID: 0}
+  tapFeedback: {fileID: 0}
+  footDust: {fileID: 0}
+  ropeStretch: {fileID: 0}
+  pullTrail: {fileID: 0}
+  goodPop: {fileID: 0}
+  greatPop: {fileID: 0}
+  superPullEffect: {fileID: 0}
+  strongPullWarning: {fileID: 0}
+  petTired: {fileID: 0}
+  powerMeterFull: {fileID: 0}
+  powerPullBurst: {fileID: 0}
+  nearWinGlow: {fileID: 0}
+  finalPull: {fileID: 0}
+  victoryStars: {fileID: 0}
+  confetti: {fileID: 0}
+  finalCelebration: {fileID: 0}
+  playerWinLine: {fileID: 0}
+  petWinLine: {fileID: 0}
 --- !u!1 &1520282700
 GameObject:
   m_ObjectHideFlags: 0

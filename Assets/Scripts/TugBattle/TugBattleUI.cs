@@ -45,6 +45,7 @@ namespace tmkoc.tugofwar
         [SerializeField] private Image powerFill;
         [SerializeField] private GameObject powerFullGlow;
         [SerializeField] private float powerGlowThreshold = 0.75f;
+        [SerializeField] private RectTransform powerMeterRoot;
 
         [Header("Level / Pause")]
         [SerializeField] private TMP_Text levelText;
@@ -83,7 +84,21 @@ namespace tmkoc.tugofwar
 
         public void SetPauseVisible(bool visible)
         {
-            if (pausePanel != null) pausePanel.SetActive(visible);
+            if (pausePanel == null) return;
+            var t = pausePanel.transform;
+            t.DOKill();
+            pausePanel.SetActive(visible);
+            if (!visible) return;
+            t.localScale = Vector3.one * 0.6f;
+            t.DOScale(1f, 0.3f).SetEase(Ease.OutBack);
+        }
+
+        public void PunchPowerMeter()
+        {
+            var t = powerMeterRoot != null ? powerMeterRoot : (powerFill != null ? powerFill.rectTransform : null);
+            if (t == null) return;
+            t.DOKill(true);
+            t.DOPunchScale(Vector3.one * 0.2f, 0.35f, 8, 0.6f);
         }
 
         public void SetPauseButtonVisible(bool visible)

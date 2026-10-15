@@ -103,6 +103,8 @@ namespace tmkoc.tugofwar
             petBot.Begin(cfg);
 
             vfx?.StopAll();
+            player.ResetTween();
+            pet.ResetTween();
             ui.ResetUI();
             ui.SetLevel(levelIndex);
             ui.SetPauseButtonVisible(true);
@@ -231,7 +233,7 @@ namespace tmkoc.tugofwar
             {
                 finalPush = true;
                 Sound(s => s.PlayMusic(MusicId.FinalPush));
-                vfx?.NearWinGlow(true);
+                vfx?.NearWinGlow(true, rope < 0f);
             }
             else if (finalPush && abs < finalPushRope - 18f)
             {
@@ -351,6 +353,8 @@ namespace tmkoc.tugofwar
             ui.SetPower(0f);
             ui.ShowBanner(BannerKind.PowerPull, 1.1f);
             vfx?.PowerPullBurst();
+            vfx?.ShakeCamera(0.25f);
+            ui.PunchPowerMeter();
             ropeView.FlagShake(1.2f);
             Sound(s => { s.PlaySfx(SfxId.PowerWhoosh); s.PlayVoice(VoiceId.PowerPull); });
         }
@@ -393,6 +397,7 @@ namespace tmkoc.tugofwar
             {
                 player.SetPose(Pose.FinalPull);
                 pet.SetPose(Pose.LosingGround);
+                pet.SlideForward();
                 vfx?.FinalPull();
                 ropeView.FlagShake(1.5f);
                 Sound(s => { s.PlaySfx(SfxId.FinalPull); s.PlaySfx(SfxId.FlagMove, 1f, 1f, 0.1f); });
@@ -411,6 +416,7 @@ namespace tmkoc.tugofwar
             if (playerWon)
             {
                 player.SetPose(Pose.Celebrate);
+                player.Celebrate();
                 pet.SetPose(Pose.Lose);
                 vfx?.VictoryStars();
                 vfx?.Confetti();
@@ -428,7 +434,9 @@ namespace tmkoc.tugofwar
             else
             {
                 player.SetPose(Pose.Lose);
+                player.Slump();
                 pet.SetPose(Pose.Celebrate);
+                pet.Celebrate();
                 Sound(s =>
                 {
                     s.PlayMusic(MusicId.Lose, 0.15f);

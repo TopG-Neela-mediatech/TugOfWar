@@ -46,12 +46,55 @@ namespace tmkoc.tugofwar
         private Vector3 baseScale;
         private bool hasBaseScale;
 
+        [Header("Reactions (tweens)")]
+        [SerializeField] private float jumpHeight = 40f;
+        [Tooltip("Pet: negative = slides toward the Player when the Player wins. Player: leave 0.")]
+        [SerializeField] private float slideX = 0f;
+
+        private Vector3 baseLocalPos;
+        private Quaternion baseLocalRot;
+
         private Transform Target => punchTarget != null ? punchTarget : transform;
 
         private void Awake()
         {
             baseScale = Target.localScale;
+            baseLocalPos = Target.localPosition;
+            baseLocalRot = Target.localRotation;
             hasBaseScale = true;
+        }
+
+        /// <summary>Kill reaction tweens and return to the start transform (call at the start of every round).</summary>
+        public void ResetTween()
+        {
+            if (!hasBaseScale) return;
+            Target.DOKill();
+            Target.localScale = baseScale;
+            Target.localPosition = baseLocalPos;
+            Target.localRotation = baseLocalRot;
+        }
+
+        /// <summary>Happy loop: bouncing jump.</summary>
+        public void Celebrate()
+        {
+            Target.DOKill();
+            Target.localScale = baseScale;
+            Target.DOLocalMoveY(baseLocalPos.y + jumpHeight, 0.3f).SetEase(Ease.OutQuad).SetLoops(-1, LoopType.Yoyo);
+        }
+
+        /// <summary>Funny lose: tilt over and sink a little.</summary>
+        public void Slump()
+        {
+            Target.DOKill();
+            Target.localScale = baseScale;
+            Target.DOLocalRotate(new Vector3(0f, 0f, 10f), 0.5f).SetEase(Ease.OutBack);
+            Target.DOLocalMoveY(baseLocalPos.y - jumpHeight * 0.4f, 0.5f).SetEase(Ease.OutBounce);
+        }
+
+        /// <summary>Pet sliding forward while still holding the rope.</summary>
+        public void SlideForward()
+        {
+            Target.DOLocalMoveX(baseLocalPos.x + slideX, 0.6f).SetEase(Ease.OutCubic);
         }
 
         public void SetPose(Pose pose, bool force = false)

@@ -1,3 +1,4 @@
+using DG.Tweening;
 using UnityEngine;
 
 namespace tmkoc.tugofwar
@@ -34,7 +35,38 @@ namespace tmkoc.tugofwar
         [SerializeField] private ParticleSystem confetti;
         [SerializeField] private ParticleSystem finalCelebration;
 
+        [Header("Tween effects")]
+        [SerializeField] private Transform playerWinLine;
+        [SerializeField] private Transform petWinLine;
+
         private Camera Cam => worldCamera != null ? worldCamera : Camera.main;
+        private Vector3 camStart;
+        private bool hasCamStart;
+        private Vector3 playerLineScale = Vector3.one, petLineScale = Vector3.one;
+
+        private void Awake()
+        {
+            if (Cam != null) { camStart = Cam.transform.localPosition; hasCamStart = true; }
+            if (playerWinLine != null) playerLineScale = playerWinLine.localScale;
+            if (petWinLine != null) petLineScale = petWinLine.localScale;
+        }
+
+        public void ShakeCamera(float strength = 0.3f, float time = 0.3f)
+        {
+            if (!hasCamStart || Cam == null) return;
+            var t = Cam.transform;
+            t.DOKill();
+            t.localPosition = camStart;
+            t.DOShakePosition(time, strength, 25, 90f).OnComplete(() => t.localPosition = camStart);
+        }
+
+        private void PulseLine(Transform line, Vector3 baseScale, bool on)
+        {
+            if (line == null) return;
+            line.DOKill();
+            line.localScale = baseScale;
+            if (on) line.DOScale(baseScale * 1.15f, 0.25f).SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo);
+        }
 
         public void TapFeedback(Vector2 screenPos, TapTier tier)
         {
@@ -67,10 +99,16 @@ namespace tmkoc.tugofwar
         public void Confetti() => PlayOnce(confetti);
         public void FinalCelebration() => PlayOnce(finalCelebration);
 
-        public void NearWinGlow(bool on) => SetLoop(nearWinGlow, on);
+        public void NearWinGlow(bool on, bool playerSide = true)
+        {
+            SetLoop(nearWinGlow, on);
+            PulseLine(playerWinLine, playerLineScale, on && playerSide);
+            PulseLine(petWinLine, petLineScale, on && !playerSide);
+        }
 
         public void StopAll()
         {
+            NearWinGlow(false);
             ParticleSystem[] all =
             {
                 tapFeedback, footDust, ropeStretch, pullTrail, goodPop, greatPop, superPullEffect, strongPullWarning,
