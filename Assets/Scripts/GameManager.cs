@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace tmkoc.tugofwar
+namespace tmkoc.temp
 {
     public class GameManager : MonoBehaviour
     {
