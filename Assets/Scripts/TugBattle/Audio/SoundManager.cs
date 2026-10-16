@@ -59,15 +59,45 @@ namespace tmkoc.tugofwar
         public Vector2 pitchRange = Vector2.one;
     }
 
+    /// <summary>
+    /// Voice-over keys for RuntimeAudioLoader (same idea as Animal Claw's AudioMapper).
+    /// Each cue can hold several keys - one is picked at random. Edit the strings to match the clip names in your audio bundle.
+    /// </summary>
     [Serializable]
-    public class VoiceEntry
+    public class AudioMapper
     {
-        public VoiceId id;
-        [Tooltip("Several clips = random variation.")]
-        public AudioClip[] clips;
-        [Tooltip("Optional key for RuntimeAudioLoader.GetClip() when no clip is assigned.")]
-        public string runtimeKey;
+        public string[] tapFast = { "tapfast" };                   // "Tap Fast!"
+        public string[] keepTapping = { "keeptapping" };           // "Keep Tapping!"
+        public string[] strongPull = { "strongpull" };             // "Strong Pull!"
+        public string[] nowTapFast = { "nowtapfast" };             // "Now! Tap Fast!"
+        public string[] good = { "good" };                         // "Good!"
+        public string[] great = { "great" };                       // "Great!"
+        public string[] superPull = { "superpull" };               // "Super Pull!"
+        public string[] powerPull = { "powerpull" };               // "Power Pull!"
+        public string[] youWin = { "youwin" };                     // "You Win!"
+        public string[] almostTapFaster = { "almosttapfaster" };   // "Almost! Tap Faster!"
+        public string[] amazingFinal = { "amazingfinal" };         // "Amazing! You won all the Tug Battles!"
+
+        public string[] Get(VoiceId id)
+        {
+            switch (id)
+            {
+                case VoiceId.TapFast: return tapFast;
+                case VoiceId.KeepTapping: return keepTapping;
+                case VoiceId.StrongPull: return strongPull;
+                case VoiceId.NowTapFast: return nowTapFast;
+                case VoiceId.Good: return good;
+                case VoiceId.Great: return great;
+                case VoiceId.SuperPull: return superPull;
+                case VoiceId.PowerPull: return powerPull;
+                case VoiceId.YouWin: return youWin;
+                case VoiceId.AlmostTapFaster: return almostTapFaster;
+                case VoiceId.AmazingFinal: return amazingFinal;
+            }
+            return null;
+        }
     }
+
 
     /// <summary>
     /// Scene sound manager: music (crossfade), pooled SFX, and a single voice channel.
@@ -76,24 +106,21 @@ namespace tmkoc.tugofwar
     /// </summary>
     public class SoundManager : MonoBehaviour
     {
-        public static SoundManager Instance { get; private set; }
-
         [Header("Library")]
         [SerializeField] private MusicEntry[] music;
         [SerializeField] private SfxEntry[] sfx;
-        [SerializeField] private VoiceEntry[] voices;
+        [Header("Voice-over keys (RuntimeAudioLoader) - edit to match your audio bundle")]
+        [SerializeField] private AudioMapper voiceKeys = new AudioMapper();
 
         [Header("Volumes")]
         [Range(0f, 1f)] [SerializeField] private float masterVolume = 1f;
         [Range(0f, 1f)] [SerializeField] private float sfxVolume = 0.9f;
-        [Range(0f, 1f)] [SerializeField] private float voiceVolume = 1f;
         [SerializeField] private int sfxVoices = 10;
         [Tooltip("Music is lowered to this fraction while a voice line plays.")]
         [Range(0.2f, 1f)] [SerializeField] private float duckTo = 0.55f;
 
         private readonly Dictionary<MusicId, MusicEntry> musicMap = new Dictionary<MusicId, MusicEntry>();
         private readonly Dictionary<SfxId, SfxEntry> sfxMap = new Dictionary<SfxId, SfxEntry>();
-        private readonly Dictionary<VoiceId, VoiceEntry> voiceMap = new Dictionary<VoiceId, VoiceEntry>();
         private readonly Dictionary<VoiceId, int> lastVoiceIndex = new Dictionary<VoiceId, int>();
 
         private AudioSource[] musicSources;   // two sources for crossfading
@@ -102,28 +129,21 @@ namespace tmkoc.tugofwar
         private float currentMusicVolume;
         private AudioSource[] sfxSources;
         private int nextSfx;
-        private AudioSource voiceSource;
         private bool muted;
         private Coroutine duckRoutine;
 
         private void Awake()
         {
-            if (Instance != null && Instance != this) { Destroy(gameObject); return; }
-            Instance = this;
-
             foreach (var m in music ?? Array.Empty<MusicEntry>()) if (m != null) musicMap[m.id] = m;
             foreach (var s in sfx ?? Array.Empty<SfxEntry>()) if (s != null) sfxMap[s.id] = s;
-            foreach (var v in voices ?? Array.Empty<VoiceEntry>()) if (v != null) voiceMap[v.id] = v;
 
             musicSources = new[] { CreateSource("Music A", true), CreateSource("Music B", true) };
-            voiceSource = CreateSource("Voice", false);
             sfxSources = new AudioSource[Mathf.Max(1, sfxVoices)];
             for (int i = 0; i < sfxSources.Length; i++) sfxSources[i] = CreateSource("Sfx " + i, false);
         }
 
         private void OnDestroy()
         {
-            if (Instance == this) Instance = null;
             AudioListener.pause = false;
             DOTween.Kill(this);
         }
@@ -206,25 +226,24 @@ namespace tmkoc.tugofwar
         public void PlayTap(TapTier tier) => PlaySfx(SfxId.Tap, 1f + (int)tier * 0.18f);
         #endregion
 
-        #region Voice
-        public bool IsVoicePlaying => voiceSource != null && voiceSource.isPlaying;
+        #region Voice (RuntimeAudioLoader keys)
+        public bool IsVoicePlaying => RuntimeAudioLoader.Instance != null && RuntimeAudioLoader.Instance._commonAudioSource.isPlaying;
 
         /// <param name="interrupt">False = skip if another line is still playing (for chatty cues like Good/Great).</param>
+        /// <returns>True if a line was started (or scheduled).</returns>
         public bool PlayVoice(VoiceId id, bool interrupt = true, float delay = 0f)
         {
-            if (muted) return false;
+            if (muted || RuntimeAudioLoader.Instance == null) return false;
             if (delay > 0f) { StartCoroutine(PlayVoiceDelayed(id, interrupt, delay)); return true; }
             if (!interrupt && IsVoicePlaying) return false;
 
-            var clip = ResolveVoice(id);
-            if (clip == null) return false;
+            string key = PickKey(id);
+            if (string.IsNullOrEmpty(key)) return false;
 
-            voiceSource.Stop();
-            voiceSource.volume = voiceVolume * masterVolume;
-            voiceSource.clip = clip;
-            voiceSource.Play();
+            float length = RuntimeAudioLoader.Instance.PlayRuntimeAudio(key);
+            if (length < 0f) return false;
             if (duckRoutine != null) StopCoroutine(duckRoutine);
-            duckRoutine = StartCoroutine(DuckMusic(clip.length));
+            duckRoutine = StartCoroutine(DuckMusic(length));
             return true;
         }
 
@@ -234,24 +253,21 @@ namespace tmkoc.tugofwar
             PlayVoice(id, interrupt);
         }
 
-        public void StopVoice() => voiceSource.Stop();
-
-        private AudioClip ResolveVoice(VoiceId id)
+        public void StopVoice()
         {
-            if (!voiceMap.TryGetValue(id, out var entry)) return null;
+            if (RuntimeAudioLoader.Instance != null) RuntimeAudioLoader.Instance.StopCommonAudioSource();
+        }
 
-            if (entry.clips != null && entry.clips.Length > 0)
-            {
-                int index = UnityEngine.Random.Range(0, entry.clips.Length);
-                if (entry.clips.Length > 1 && lastVoiceIndex.TryGetValue(id, out int last) && last == index)
-                    index = (index + 1) % entry.clips.Length;
-                lastVoiceIndex[id] = index;
-                if (entry.clips[index] != null) return entry.clips[index];
-            }
-
-            if (!string.IsNullOrEmpty(entry.runtimeKey) && RuntimeAudioLoader.Instance != null)
-                return RuntimeAudioLoader.Instance.GetClip(entry.runtimeKey);
-            return null;
+        // Several keys for one cue = random variation, never the same one twice in a row.
+        private string PickKey(VoiceId id)
+        {
+            string[] keys = voiceKeys.Get(id);
+            if (keys == null || keys.Length == 0) return null;
+            int index = UnityEngine.Random.Range(0, keys.Length);
+            if (keys.Length > 1 && lastVoiceIndex.TryGetValue(id, out int last) && last == index)
+                index = (index + 1) % keys.Length;
+            lastVoiceIndex[id] = index;
+            return keys[index];
         }
 
         private IEnumerator DuckMusic(float seconds)
@@ -267,8 +283,9 @@ namespace tmkoc.tugofwar
         public void SetMuted(bool value)
         {
             muted = value;
-            if (value) { voiceSource.Stop(); foreach (var s in sfxSources) s.Stop(); }
+            if (value) { StopVoice(); foreach (var s in sfxSources) s.Stop(); }
             foreach (var m in musicSources) m.mute = value;
+            if (RuntimeAudioLoader.Instance != null) RuntimeAudioLoader.Instance._commonAudioSource.mute = value;
         }
 
         /// <summary>Used by pause: freezes every AudioSource (AudioListener.pause).</summary>
@@ -289,7 +306,6 @@ namespace tmkoc.tugofwar
         {
             music = Fill(music, (MusicId[])Enum.GetValues(typeof(MusicId)), (e, id) => e.id == id, id => new MusicEntry { id = id }, id => id != MusicId.None);
             sfx = Fill(sfx, (SfxId[])Enum.GetValues(typeof(SfxId)), (e, id) => e.id == id, id => new SfxEntry { id = id }, id => true);
-            voices = Fill(voices, (VoiceId[])Enum.GetValues(typeof(VoiceId)), (e, id) => e.id == id, id => new VoiceEntry { id = id }, id => true);
             UnityEditor.EditorUtility.SetDirty(this);
         }
 

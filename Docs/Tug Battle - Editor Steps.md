@@ -4,11 +4,11 @@ Open `TugOfWar` scene. Wait for compile. Console must have 0 errors.
 
 ## 1. Empty objects (Hierarchy > Create Empty)
 1. **GameManager** - add `GameManager`.
-2. **LevelManager** - add `LevelManager`. Drag in: Playschool Back Button, **Battle** (step 3). Leave Level Configs empty.
-   Drag LevelManager into GameManager > Level Manager.
+2. **LevelManager** - add `LevelManager`. Drag in the Playschool Back Button. Leave Level Configs empty.
 3. **TugBattle** - add `TugBattleController` and `TugBattleVfx`.
 4. **SoundManager** - add `SoundManager`. Right-click its header > **Populate All Entries**. (Sounds work with placeholders; drop real clips in later.)
-5. Make sure the scene has **PlayschoolCommon** (with the WinLose prefab) and an **EventSystem**.
+   Now on **GameManager** drag in: Level Manager, Sound Manager, Battle Controller (TugBattle). (No static singletons - everything goes through GameManager.)
+5. Make sure the scene has an **EventSystem**, a **RuntimeAudioLoader** (voice lines) and your **EndPanelScript** (win panel + lose panel + Home buttons + rays). Win panel shows 5 s (or until the voice ends) then starts the NEXT level; lose panel shows 5 s then RETRIES the same level - no buttons needed.
 
 ## 2. World objects (your sprites)
 ```
@@ -41,7 +41,6 @@ TapArea must be ABOVE the other UI in the list (top) so buttons stay clickable.
 ## 4. Final wiring
 - `TugBattleController`: Rope View, Player, Pet, Ui, Vfx.
 - `TugBattleVfx`: drag Player/Pet Win Lines (for pulse) + any particle systems you have (all optional).
-- `LevelManager` > Battle = TugBattle.
 
 ## 5. Test
 Press Play, click Space or tap the screen. You should see 3-2-1-GO, then taps pull the flag left.

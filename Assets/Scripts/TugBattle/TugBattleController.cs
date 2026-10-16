@@ -501,7 +501,9 @@ namespace tmkoc.tugofwar
 
         private static void Sound(System.Action<SoundManager> call)
         {
-            if (SoundManager.Instance != null) call(SoundManager.Instance);
+            var sm = GameManager.Instance.SoundManager;
+            if (sm != null) call(sm);
+            else Debug.LogWarning("TugBattleController: GameManager.SoundManager is not assigned.");
         }
     }
 }

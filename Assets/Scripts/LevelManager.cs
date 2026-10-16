@@ -10,20 +10,25 @@ namespace tmkoc.tugofwar
         [SerializeField] private Button playSchoolBackButton;
         [Tooltip("Optional per-level scenery. Entry N is shown on level N (others hidden).")]
         [SerializeField] private GameObject[] levels;
-        [SerializeField] private TugBattleController battle;
         [Tooltip("One entry per level. Leave empty to use the 5 default levels.")]
         [SerializeField] private TugLevelConfig[] levelConfigs;
-        [SerializeField] private float resultPanelDelay = 1.8f;
+        [SerializeField] private float resultPanelDelay = 1f;
 
         public int currentLevelIndex { get; private set; }
+        public bool HasLevelStarted { get; private set; }
         private int TotalLevels => levelConfigs.Length;
         private bool isRetry;
+
+        private void StartLevel()
+        {
+            HasLevelStarted = true;
+            GameManager.Instance.InvokeLevelStart();
+        }
 
         private void Awake()
         {
             if (levelConfigs == null || levelConfigs.Length == 0) levelConfigs = TugLevelConfig.CreateDefaults();
             SetDataSaver();
-            PlayschoolCommon.Instance.SpawnplayschoolWinLosePanel();
             playSchoolBackButton.onClick.AddListener(() => SceneManager.LoadScene(TMKOCPlaySchoolConstants.TMKOCPlayMainMenu));
         }
         private void Start()
@@ -33,18 +38,15 @@ namespace tmkoc.tugofwar
             GameManager.Instance.OnLevelLose += OnLevelLose;
             StartLevel();
         }
-        private void StartLevel() => GameManager.Instance.InvokeLevelStart();
-
         private void OnLevelStart()
         {
             ShowLevelScenery();
             bool isFinal = currentLevelIndex == TotalLevels - 1;
-            battle.BeginLevel(currentLevelIndex, levelConfigs[currentLevelIndex], isFinal, isRetry);
+            GameManager.Instance.BattleController.BeginLevel(currentLevelIndex, levelConfigs[currentLevelIndex], isFinal, isRetry);
             isRetry = false;
         }
         private void OnLevelWin()
         {
-            SaveLevel();
             StartCoroutine(LoadWinPanelWithDelay(resultPanelDelay));
         }
         private void OnLevelLose()
@@ -55,14 +57,12 @@ namespace tmkoc.tugofwar
         private IEnumerator LoadWinPanelWithDelay(float delay)
         {
             yield return new WaitForSeconds(delay);
-            SoundManager.Instance?.StopAllExceptMusic();
-            WinLosePanelScript.Instance.ShowNextLevelPopUp(LoadNextLevel);
+            GameManager.Instance.EndPanelScript.ShowWin();
         }
         private IEnumerator LoadLosePanelWithDelay(float delay)
         {
             yield return new WaitForSeconds(delay);
-            SoundManager.Instance?.StopAllExceptMusic();
-            WinLosePanelScript.Instance.ShowRetryPopUp(RetryLevel);
+            GameManager.Instance.EndPanelScript.ShowLose();
         }
         private void ShowLevelScenery()
         {
@@ -78,29 +78,39 @@ namespace tmkoc.tugofwar
         private void SaveLevel()
         {
             currentLevelIndex++;
-            // Helper convention: LevelCompleted(n) = n levels finished (n == total -> 100% / 5 stars)
+            // Saved even past the last level; GetStartLevel() wraps a saved index >= level count back to 0.
             HelperGameCategoryDataSaver.LevelCompleted(currentLevelIndex);
             if (currentLevelIndex >= TotalLevels)
             {
 #if PLAYSCHOOL_MAIN
                     EffectParticleControll.Instance.SpawnGameEndPanel();
-                   //GameManager.Instance.SoundManager.PlayFinalOutro();
                     GameOverEndPanel.Instance.AddTheListnerRetryGame();
                     return;
 #endif
-                currentLevelIndex = 0; // all levels done - "next" replays from level 1
+                currentLevelIndex = 0;
+                return;
             }
         }
         public void LoadNextLevel()
         {
-            if (currentLevelIndex < TotalLevels)
-            {
-                StartLevel();
-            }
+            SaveLevel();
+            RestartLevel();
         }
-        private void RetryLevel()
+        public void RetryLevel()
         {
             isRetry = true;
+            RestartLevel();
+        }
+        // Restarts the current level index in place (index 0 after the last level) without reloading the scene.
+        private void RestartLevel()
+        {
+            if (currentLevelIndex >= TotalLevels)
+            {
+                currentLevelIndex = 0;
+            }
+            HasLevelStarted = false;
+            GameManager.Instance.SoundManager.StopAllExceptMusic();
+            GameManager.Instance.InvokeLevelReset();
             StartLevel();
         }
         private void OnDestroy()

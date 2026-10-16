@@ -43,6 +43,8 @@ Target: mobile, kids 3-8. Voice = warm, energetic, friendly; short lines (under 
 
 ## 3. Voice-overs (VoiceId)
 
+Voices are NOT Inspector clips. They play through `RuntimeAudioLoader` by key. On SoundManager > **Voice Keys** each cue has a string array (default keys shown below, e.g. `tapfast`). Edit the strings to match the clip names in your audio bundle; add several strings to a cue for random variation.
+
 Record 2-3 takes of the chatty ones so it doesn't repeat. Assign extra takes to the same row (random pick, no immediate repeat).
 
 | Id | File name | Line | When | Delivery |
@@ -59,7 +61,7 @@ Record 2-3 takes of the chatty ones so it doesn't repeat. Assign extra takes to 
 | AlmostTapFaster | `vo_almost_tap_faster` | "Almost! Tap Faster!" | Lose | Kind, motivating, never disappointed |
 | AmazingFinal | `vo_amazing_final` | "Amazing! You won all the Tug Battles!" | Win on the last level | Proud, huge |
 
-Voice rules built into SoundManager: voice uses its own channel, music ducks to 55% while it plays, and chatty cues
+Voice rules built into SoundManager: voice plays on RuntimeAudioLoader's common audio source, music ducks to 55% while it plays, and chatty cues
 (Good / Great / Super / Keep Tapping / Tap Fast in danger zone) are skipped when another line is still playing.
 Important cues (Strong Pull, Now! Tap Fast, Power Pull, win/lose) interrupt.
 
