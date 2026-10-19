@@ -2,14 +2,13 @@ using System;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace tmkoc.tugofwar
 {
     /// <summary>
-    /// Gameplay HUD: countdown, prompts/banners, floating Good/Great/Super text, power meter, level, pause.
-    /// Banners and pops are just GameObjects - drop in an Image (your art) or a TMP text, whatever you like.
+    /// Gameplay HUD: countdown, prompts/banners, floating Good/Great/Super text and the power meter.
+    /// All text is TextMeshPro (Fredoka); everything animates with DOTween.
     /// </summary>
     public class TugBattleUI : MonoBehaviour
     {
@@ -24,11 +23,12 @@ namespace tmkoc.tugofwar
         public class PopEntry
         {
             public PopKind kind;
-            [Tooltip("Prefab (Image or TMP text). Add a CanvasGroup to get a fade-out.")]
+            [Tooltip("Text prefab. Add a CanvasGroup to get a fade-out.")]
             public RectTransform prefab;
         }
 
         [Header("Countdown")]
+        [SerializeField] private RectTransform countdownRoot;
         [SerializeField] private TMP_Text countdownText;
 
         [Header("Banners (Tap Fast / Keep Tapping / Strong Pull / Pet Tired / Power Pull)")]
@@ -47,50 +47,16 @@ namespace tmkoc.tugofwar
         [SerializeField] private float powerGlowThreshold = 0.75f;
         [SerializeField] private RectTransform powerMeterRoot;
 
-        [Header("Level / Pause")]
-        [SerializeField] private TMP_Text levelText;
-        [SerializeField] private Button pauseButton;
-        [SerializeField] private GameObject pausePanel;
-        [SerializeField] private Button resumeButton;
-        [SerializeField] private Button homeButton;
-
-        public event Action PauseClicked;
-        public event Action ResumeClicked;
-
         private BannerKind? activeBanner;
         private Tween bannerHideTween;
 
-        private void Awake()
-        {
-            if (pauseButton != null) pauseButton.onClick.AddListener(() => PauseClicked?.Invoke());
-            if (resumeButton != null) resumeButton.onClick.AddListener(() => ResumeClicked?.Invoke());
-            if (homeButton != null)
-                homeButton.onClick.AddListener(() => SceneManager.LoadScene(TMKOCPlaySchoolConstants.TMKOCPlayMainMenu));
-            ResetUI();
-        }
+        private void Awake() => ResetUI();
 
         public void ResetUI()
         {
             HideCountdown();
             HideBanner();
             SetPower(0f);
-            if (pausePanel != null) pausePanel.SetActive(false);
-        }
-
-        public void SetLevel(int levelIndex)
-        {
-            if (levelText != null) levelText.text = "Level " + (levelIndex + 1);
-        }
-
-        public void SetPauseVisible(bool visible)
-        {
-            if (pausePanel == null) return;
-            var t = pausePanel.transform;
-            t.DOKill();
-            pausePanel.SetActive(visible);
-            if (!visible) return;
-            t.localScale = Vector3.one * 0.6f;
-            t.DOScale(1f, 0.3f).SetEase(Ease.OutBack);
         }
 
         public void PunchPowerMeter()
@@ -101,28 +67,22 @@ namespace tmkoc.tugofwar
             t.DOPunchScale(Vector3.one * 0.2f, 0.35f, 8, 0.6f);
         }
 
-        public void SetPauseButtonVisible(bool visible)
-        {
-            if (pauseButton != null) pauseButton.gameObject.SetActive(visible);
-        }
-
         #region Countdown
         public void ShowCountdown(string text)
         {
-            if (countdownText == null) return;
-            countdownText.gameObject.SetActive(true);
-            countdownText.text = text;
-            var t = countdownText.rectTransform;
-            t.DOKill();
-            t.localScale = Vector3.one * 1.6f;
-            t.DOScale(1f, 0.35f).SetEase(Ease.OutBack);
+            if (countdownRoot == null) return;
+            countdownRoot.gameObject.SetActive(true);
+            if (countdownText != null) countdownText.text = text;
+            countdownRoot.DOKill();
+            countdownRoot.localScale = Vector3.one * 1.6f;
+            countdownRoot.DOScale(1f, 0.35f).SetEase(Ease.OutBack);
         }
 
         public void HideCountdown()
         {
-            if (countdownText == null) return;
-            countdownText.rectTransform.DOKill();
-            countdownText.gameObject.SetActive(false);
+            if (countdownRoot == null) return;
+            countdownRoot.DOKill();
+            countdownRoot.gameObject.SetActive(false);
         }
         #endregion
 

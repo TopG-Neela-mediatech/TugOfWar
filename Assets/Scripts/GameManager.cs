@@ -9,6 +9,8 @@ namespace tmkoc.tugofwar
         [SerializeField] private SoundManager soundManager;
         [SerializeField] private TugBattleController battleController;
         [SerializeField] private EndPanelScript endPanelScript;
+        [SerializeField] private AssetsSO assets;
+        [SerializeField] private TutorialManager tutorialManager;
         private static GameManager instance;
 
 
@@ -17,6 +19,8 @@ namespace tmkoc.tugofwar
         public SoundManager SoundManager { get { return soundManager; } }
         public TugBattleController BattleController { get { return battleController; } }
         public EndPanelScript EndPanelScript { get { return endPanelScript; } }
+        public AssetsSO Assets { get { return assets; } }
+        public TutorialManager TutorialManager { get { return tutorialManager; } }
      
       
         private void Awake()

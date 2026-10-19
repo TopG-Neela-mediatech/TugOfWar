@@ -11,30 +11,41 @@ namespace tmkoc.tugofwar.EditorTools
 {
     /// <summary>
     /// Tools > Tug Battle > Build Scene
-    /// Creates the world (rope, flag, Player, Pet, win lines), the HUD, TapArea and the EndPanel with PLACEHOLDER
-    /// visuals (Unity's built-in UI sprites), then wires every reference on GameManager, TugBattleController, TugBattleUI,
-    /// RopeView, CharacterView, TapInput, TugBattleVfx and EndPanelScript. Safe to run again: it rebuilds what it made.
-    /// Afterwards just swap the sprites; nothing else needs to be assigned.
+    /// Builds the ENTIRE game as UI under MainCanvas (1920x1080 reference): background, ground, win lines, rope, flag,
+    /// Player, Pet, HUD, tap area and the tutorial hand. Uses placeholder shapes, creates
+    /// Assets/ScriptableObjects/AssetsSO.asset and wires every reference. Your own BG and WinLose (EndPanelScript)
+    /// objects are reused if they exist. Safe to run again: it rebuilds what it made (your AssetsSO is kept).
     /// </summary>
     public static class TugBattleSceneBuilder
     {
-        private const string WorldName = "TugBattleWorld";
+        private const string GameName = "TugGame";
+        private const string OldWorldName = "TugBattleWorld";
         private const string HudName = "TugHUD";
         private const string TapAreaName = "TapArea";
-        private const string EndPanelName = "EndPanel";
+        private const string TutorialName = "TutorialManager";
+        private const string AssetsPath = "Assets/ScriptableObjects/AssetsSO.asset";
+        private const string FredokaPath = "Assets/APIs/PlayschoolFonts/Fredoka/TMP_Fredoka/Fredoka-Regular SDF.asset";
 
-        // Units match the HTML prototype scaled to the 17.78 x 10 ortho view (1600 px -> 17.78 units)
-        private const float WinLineX = 2.44f;
-        private const float HandsY = -1.9f;
+        // Canvas pixels (HTML prototype 1600x900 scaled by 1.2 to the 1920x1080 reference)
+        private const float WinLineX = 264f;
+        private const float PlayerStartX = -528f;
+        private const float PetStartX = 528f;
+        private const float FeetY = -330f;
+        private const float HandsY = -210f;
 
         private static Sprite square;
         private static Sprite circle;
+        private static TMP_FontAsset fredoka;
 
         [MenuItem("Tools/Tug Battle/Build Scene")]
         public static void Build()
         {
             square = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd");
             circle = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
+            fredoka = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FredokaPath);
+
+            if (!EditorUtility.DisplayDialog("Build Tug Battle scene", "This rebuilds TugGame, TugHUD, TapArea and the TutorialManager and discards manual edits made to them (sprites set directly on those objects, deleted objects, etc.). Your AssetsSO, BG and WinLose are kept. Continue?", "Rebuild", "Cancel"))
+                return;
 
             var gm = Object.FindFirstObjectByType<GameManager>();
             var lm = Object.FindFirstObjectByType<LevelManager>();
@@ -49,41 +60,22 @@ namespace tmkoc.tugofwar.EditorTools
                 return;
             }
 
-            DestroyIfExists(WorldName); DestroyIfExists(HudName); DestroyIfExists(TapAreaName); DestroyIfExists(EndPanelName);
+            EndPanelScript endPanel = Object.FindFirstObjectByType<EndPanelScript>();
+            if (endPanel == null)
+            {
+                Debug.LogError("TugBattleSceneBuilder: no EndPanelScript (your WinLose panel) in the scene.");
+                return;
+            }
+
+            DestroyIfExists(OldWorldName); DestroyIfExists(GameName); DestroyIfExists(HudName);
+            DestroyIfExists(TapAreaName); DestroyIfExists("EndPanel"); DestroyIfExists(TutorialName);
 
             if (canvas.renderMode == RenderMode.ScreenSpaceCamera && canvas.worldCamera == null) canvas.worldCamera = cam;
             EnsureInputModule();
+            var assetsSO = EnsureAssetsSO();
+            var canvasRt = (RectTransform)canvas.transform;
 
-            // ------------------------------------------------------------ world
-            var world = new GameObject(WorldName).transform;
-            MakeSprite(world, "Sky", new Vector2(0, 0), new Vector2(22, 12), new Color(0.56f, 0.82f, 0.95f), square, -10);
-            MakeSprite(world, "Ground", new Vector2(0, -3.6f), new Vector2(22, 1f), new Color(0.45f, 0.75f, 0.4f), square, -9);
-
-            var playerLine = MakeSprite(world, "PlayerWinLine", new Vector2(-WinLineX, -1.3f), new Vector2(0.14f, 3.6f), new Color(0.3f, 0.6f, 1f), square, -5);
-            var petLine = MakeSprite(world, "PetWinLine", new Vector2(WinLineX, -1.3f), new Vector2(0.14f, 3.6f), new Color(1f, 0.3f, 0.45f), square, -5);
-
-            var group = new GameObject("RopeGroup").transform;
-            group.SetParent(world, false);
-            var rope = MakeSprite(group, "Rope", new Vector2(0, HandsY), new Vector2(9.4f, 0.12f), new Color(0.75f, 0.5f, 0.25f), square, 1);
-
-            var flag = new GameObject("Flag").transform;
-            flag.SetParent(group, false);
-            flag.localPosition = new Vector3(0, HandsY, 0);
-            MakeSprite(flag, "Pole", new Vector2(0, 0.5f), new Vector2(0.07f, 1f), new Color(0.35f, 0.25f, 0.2f), square, 2);
-            MakeSprite(flag, "Cloth", new Vector2(0.28f, 0.85f), new Vector2(0.5f, 0.32f), new Color(1f, 0.3f, 0.35f), square, 3);
-
-            var playerView = BuildCharacter(group, "Player", new Vector2(-4.89f, -2.35f), new Vector2(0.9f, 1.5f), new Color(1f, 0.44f, 0.57f), 0f, 1);
-            var petView = BuildCharacter(group, "Pet", new Vector2(4.89f, -2.65f), new Vector2(1.4f, 0.9f), new Color(0.97f, 0.65f, 0.3f), -0.6f, -1);
-
-            var ropeView = group.gameObject.AddComponent<RopeView>();
-            Set(ropeView, "ropeRoot", group);
-            Set(ropeView, "flag", flag);
-            Set(ropeView, "ropeSpriteRenderer", rope);
-            SetFloat(ropeView, "maxOffset", WinLineX);
-
-            // ------------------------------------------------------------ UI
-            var canvasRt = canvas.transform;
-
+            // ------------------------------------------------------------ tap area (behind everything, catches taps)
             var tapArea = NewUI(TapAreaName, canvasRt);
             Stretch(tapArea);
             var tapImg = tapArea.gameObject.AddComponent<Image>();
@@ -93,16 +85,58 @@ namespace tmkoc.tugofwar.EditorTools
             var tapInput = tapArea.gameObject.AddComponent<TapInput>();
             Set(tapInput, "controller", battle);
 
+            // ------------------------------------------------------------ game (all UI)
+            var userBg = canvasRt.Find("BG") as RectTransform;
+            var game = NewUI(GameName, canvasRt);
+            Stretch(game);
+            game.SetSiblingIndex(1);
+
+            Image bg;
+            if (userBg != null)
+            {
+                bg = userBg.GetComponent<Image>();
+                userBg.SetSiblingIndex(1);   // behind the game
+                game.SetSiblingIndex(2);
+            }
+            else
+            {
+                bg = Box(game, "Background", Vector2.zero, Vector2.zero, new Color(0.56f, 0.82f, 0.95f));
+                Stretch(bg.rectTransform);
+            }
+            var ground = Box(game, "Ground", Vector2.zero, Vector2.zero, new Color(0.45f, 0.75f, 0.4f));
+            ground.rectTransform.anchorMin = new Vector2(0, 0);
+            ground.rectTransform.anchorMax = new Vector2(1, 0);
+            ground.rectTransform.pivot = new Vector2(0.5f, 0);
+            ground.rectTransform.offsetMin = Vector2.zero;
+            ground.rectTransform.offsetMax = new Vector2(0, 220f);
+
+            var playerLine = Box(game, "PlayerWinLine", new Vector2(-WinLineX, -120), new Vector2(18, 440), new Color(0.3f, 0.6f, 1f));
+            var petLine = Box(game, "PetWinLine", new Vector2(WinLineX, -120), new Vector2(18, 440), new Color(1f, 0.3f, 0.45f));
+
+            var group = NewUI("RopeGroup", game);
+            Anchor(group, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
+
+            var rope = Box(group, "Rope", new Vector2(0, HandsY), new Vector2(1120, 14), new Color(0.75f, 0.5f, 0.25f));
+
+            var flag = Box(group, "Flag", new Vector2(0, HandsY + 70), new Vector2(110, 140), new Color(1, 1, 1, 0));
+            Box(flag.rectTransform, "Pole", new Vector2(0, 0), new Vector2(8, 140), new Color(0.35f, 0.25f, 0.2f));
+            Box(flag.rectTransform, "Cloth", new Vector2(34, 46), new Vector2(60, 38), new Color(1f, 0.3f, 0.35f));
+
+            var playerView = BuildCharacter(group, "Player", new Vector2(PlayerStartX, FeetY + 130), new Vector2(160, 260), new Color(1f, 0.44f, 0.57f), 0f, 1);
+            var petView = BuildCharacter(group, "Pet", new Vector2(PetStartX, FeetY + 75), new Vector2(240, 150), new Color(0.97f, 0.65f, 0.3f), -80f, -1);
+
+            var ropeView = group.gameObject.AddComponent<RopeView>();
+            Set(ropeView, "ropeRoot", group);
+            Set(ropeView, "flag", flag.rectTransform);
+            Set(ropeView, "flagImage", flag);
+            Set(ropeView, "ropeImage", rope);
+            SetFloat(ropeView, "maxOffset", WinLineX);
+
+            // ------------------------------------------------------------ HUD
             var hud = NewUI(HudName, canvasRt);
             Stretch(hud);
             var ui = hud.gameObject.AddComponent<TugBattleUI>();
 
-            var levelText = MakeText(hud, "LevelText", "Level 1", 56, Color.white);
-            Anchor(levelText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0, -60), new Vector2(500, 90));
-
-            var pauseButton = MakeButton(hud, "PauseButton", "II", new Vector2(1f, 1f), new Vector2(-80, -80), new Vector2(110, 110), new Color(1f, 0.8f, 0.25f));
-
-            // power meter
             var meter = NewUI("PowerMeter", hud);
             Anchor(meter, new Vector2(0.5f, 0f), new Vector2(0, 90), new Vector2(820, 64));
             var glow = MakeImage(meter, "Glow", new Color(1f, 0.85f, 0.2f, 0.45f));
@@ -116,25 +150,26 @@ namespace tmkoc.tugofwar.EditorTools
             fill.fillMethod = UnityEngine.UI.Image.FillMethod.Horizontal;
             fill.fillOrigin = 0;
             fill.fillAmount = 0f;
-            var meterLabel = MakeText(meter, "Label", "POWER", 34, Color.white);
-            Stretch(meterLabel.rectTransform);
+            var meterLabel = MakeText(meter, "Label", "POWER", 34, Color.white, new Vector2(300, 50));
+            Anchor(meterLabel.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(300, 50));
 
-            var countdown = MakeText(hud, "Countdown", "3", 320, new Color(1f, 0.95f, 0.4f));
-            Anchor(countdown.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0, 80), new Vector2(700, 420));
-            countdown.fontStyle = FontStyles.Bold;
-            countdown.gameObject.SetActive(false);
+            // countdown (text)
+            var countdownText = MakeText(hud, "Countdown", "3", 320, new Color(1f, 0.95f, 0.4f), new Vector2(700, 420));
+            Anchor(countdownText.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0, 80), new Vector2(700, 420));
+            countdownText.fontStyle = FontStyles.Bold;
+            countdownText.gameObject.SetActive(false);
 
-            // banners
+            // banners (text)
             string[] bannerText = { "TAP FAST!", "KEEP TAPPING!", "STRONG PULL!", "PET TIRED! TAP NOW!", "POWER PULL!" };
             Color[] bannerColor = { new Color(1f, 0.3f, 0.4f), new Color(0.3f, 0.8f, 0.4f), new Color(1f, 0.5f, 0.1f), new Color(0.3f, 0.65f, 1f), new Color(1f, 0.8f, 0.1f) };
             var banners = new RectTransform[5];
             for (int i = 0; i < 5; i++)
             {
-                var t = MakeText(hud, "Banner_" + (BannerKind)i, bannerText[i], 110, bannerColor[i]);
-                t.fontStyle = FontStyles.Bold;
-                Anchor(t.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0, 330), new Vector2(1500, 160));
-                t.gameObject.SetActive(false);
-                banners[i] = t.rectTransform;
+                var bt = MakeText(hud, "Banner_" + (BannerKind)i, bannerText[i], 110, bannerColor[i], new Vector2(1500, 160));
+                bt.fontStyle = FontStyles.Bold;
+                Anchor(bt.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0, 330), new Vector2(1500, 160));
+                bt.gameObject.SetActive(false);
+                banners[i] = bt.rectTransform;
             }
 
             // pops
@@ -147,29 +182,33 @@ namespace tmkoc.tugofwar.EditorTools
             var popPrefabs = new RectTransform[3];
             for (int i = 0; i < 3; i++) popPrefabs[i] = MakePopPrefab("Pop_" + (PopKind)i, popText[i], popColor[i], 70 + i * 10);
 
-            // pause panel
-            var pausePanel = MakeImage(hud, "PausePanel", new Color(0.12f, 0.1f, 0.25f, 0.92f));
-            Anchor(pausePanel.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(760, 520));
-            var pauseTitle = MakeText(pausePanel.rectTransform, "Title", "PAUSED", 90, Color.white);
-            Anchor(pauseTitle.rectTransform, new Vector2(0.5f, 1f), new Vector2(0, -90), new Vector2(700, 120));
-            var resumeButton = MakeButton(pausePanel.rectTransform, "ResumeButton", "RESUME", new Vector2(0.5f, 0.5f), new Vector2(0, 0), new Vector2(420, 110), new Color(0.3f, 0.8f, 0.4f));
-            var pauseHome = MakeButton(pausePanel.rectTransform, "HomeButton", "HOME", new Vector2(0.5f, 0.5f), new Vector2(0, -140), new Vector2(420, 110), new Color(1f, 0.5f, 0.4f));
-            pausePanel.gameObject.SetActive(false);
+            WireUI(ui, countdownText.rectTransform, countdownText, banners, popPrefabs, popParent, popAnchor, fill, glow.gameObject, meter);
 
-            WireUI(ui, countdown, banners, popPrefabs, popParent, popAnchor, fill, glow.gameObject, meter, levelText, pauseButton, pausePanel.gameObject, resumeButton, pauseHome);
+            // ------------------------------------------------------------ tutorial hand (UI) + manager
+            var handImg = MakeImage(hud, "TutorialHand", new Color(0.96f, 0.79f, 0.64f));
+            handImg.sprite = circle;
+            handImg.type = UnityEngine.UI.Image.Type.Simple;
+            Anchor(handImg.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0, -150), new Vector2(150, 150));
+            var handGroup = handImg.gameObject.AddComponent<CanvasGroup>();
+            handGroup.interactable = false; handGroup.blocksRaycasts = false;
+            var rippleImg = MakeImage(handImg.rectTransform, "Ripple", new Color(1, 1, 1, 0));
+            rippleImg.sprite = circle;
+            rippleImg.type = UnityEngine.UI.Image.Type.Simple;
+            Anchor(rippleImg.rectTransform, new Vector2(0.5f, 1f), new Vector2(0, -20), new Vector2(130, 130));
+            var handLabel = MakeText(handImg.rectTransform, "Label", "TAP", 44, new Color(0.35f, 0.25f, 0.2f), new Vector2(140, 60));
+            Anchor(handLabel.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(140, 60));
+            handImg.gameObject.SetActive(false);
 
-            // ------------------------------------------------------------ end panel
-            var endRoot = NewUI(EndPanelName, canvasRt);
-            Stretch(endRoot);
-            var endPanel = endRoot.gameObject.AddComponent<EndPanelScript>();
-            var win = BuildEndPanel(endRoot, "WinPanel", "YOU WIN!", "Next level coming up...", new Color(0.3f, 0.75f, 0.45f, 0.93f), true, out var winRays, out var winHome);
-            var lose = BuildEndPanel(endRoot, "LosePanel", "ALMOST!", "Tap Faster! Try again...", new Color(0.95f, 0.5f, 0.4f, 0.93f), false, out var loseRays, out var loseHome);
-            endRoot.SetAsLastSibling();
-            Set(endPanel, "winPanel", win);
-            Set(endPanel, "losePanel", lose);
-            Set(endPanel, "winRaysT", winRays);
-            Set(endPanel, "loseRaysT", loseRays);
-            SetArray(endPanel, "homeButtons", winHome, loseHome);
+            var tutGo = new GameObject(TutorialName);
+            tutGo.transform.SetParent(sound.transform.parent, false);
+            var tutorial = tutGo.AddComponent<TutorialManager>();
+            Set(tutorial, "hand", handImg.rectTransform);
+            Set(tutorial, "group", handGroup);
+            Set(tutorial, "ripple", rippleImg.rectTransform);
+            Set(tutorial, "rippleImage", rippleImg);
+
+            // ------------------------------------------------------------ end panel: keep the user's, draw on top
+            endPanel.transform.SetAsLastSibling();
 
             // ------------------------------------------------------------ wire managers
             Set(battle, "ropeView", ropeView);
@@ -186,81 +225,76 @@ namespace tmkoc.tugofwar.EditorTools
             Set(gm, "soundManager", sound);
             Set(gm, "battleController", battle);
             Set(gm, "endPanelScript", endPanel);
+            Set(gm, "assets", assetsSO);
+            Set(gm, "tutorialManager", tutorial);
+
+            var applier = battle.GetComponent<TugAssetsApplier>();
+            if (applier == null) applier = battle.gameObject.AddComponent<TugAssetsApplier>();
+            Set(applier, "gameManager", gm);
+            Set(applier, "ropeView", ropeView);
+            Set(applier, "player", playerView);
+            Set(applier, "pet", petView);
+            Set(applier, "tutorial", tutorial);
+            Set(applier, "backgroundImage", bg);
+            Set(applier, "groundImage", ground);
+            Set(applier, "playerWinLineImage", playerLine);
+            Set(applier, "petWinLineImage", petLine);
 
             var scene = EditorSceneManager.GetActiveScene();
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
-            Selection.activeGameObject = world.gameObject;
-            Debug.Log("Tug Battle scene built and saved. Press Play - the game starts straight away. Swap the placeholder sprites when your art is ready.");
+            Selection.activeObject = assetsSO;
+            Debug.Log("Tug Battle built under MainCanvas and saved. Fill Assets/ScriptableObjects/AssetsSO with sprites, then press Play.");
+        }
+
+        // ================================================================== assets
+
+        private static AssetsSO EnsureAssetsSO()
+        {
+            var existing = AssetDatabase.LoadAssetAtPath<AssetsSO>(AssetsPath);
+            if (existing != null) return existing;
+
+            Directory.CreateDirectory("Assets/ScriptableObjects");
+            var so = ScriptableObject.CreateInstance<AssetsSO>();
+            AssetDatabase.CreateAsset(so, AssetsPath);
+            AssetDatabase.SaveAssets();
+            return so;
         }
 
         // ================================================================== builders
 
         private static CharacterView BuildCharacter(Transform parent, string name, Vector2 pos, Vector2 bodySize, Color color, float slideX, int facing)
         {
-            var body = MakeSprite(parent, name, pos, bodySize, color, square, 2);
-            MakeSprite(body.transform, "Head", new Vector2(0, bodySize.y * 0.5f + 0.35f), new Vector2(0.75f, 0.75f), new Color(0.96f, 0.79f, 0.64f), circle, 3, true);
-            MakeSprite(body.transform, "Eye", new Vector2(0.18f * -facing, bodySize.y * 0.5f + 0.42f), new Vector2(0.12f, 0.12f), new Color(0.23f, 0.18f, 0.29f), circle, 4, true);
+            // Single sprite character: just a body Image (placeholder colour) - no head or eyes.
+            var body = Box(parent, name, pos, bodySize, color);
             var view = body.gameObject.AddComponent<CharacterView>();
-            Set(view, "spriteRenderer", body);
-            Set(view, "punchTarget", body.transform);
-            SetFloat(view, "jumpHeight", 0.4f);
+            Set(view, "uiImage", body);
+            Set(view, "punchTarget", body.rectTransform);
+            SetFloat(view, "jumpHeight", 50f);
             SetFloat(view, "slideX", slideX);
+            SetFloat(view, "leanDirection", facing);   // player (left) = +1, pet (right) = -1
             return view;
-        }
-
-        private static RectTransform BuildEndPanel(RectTransform parent, string name, string title, string sub, Color bg, bool stars, out RectTransform rays, out Button home)
-        {
-            var panel = MakeImage(parent, name, bg);
-            Stretch(panel.rectTransform);
-
-            var raysImg = MakeImage(panel.rectTransform, "Rays", new Color(1f, 0.95f, 0.5f, 0.22f));
-            Anchor(raysImg.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0, 60), new Vector2(1100, 1100));
-            raysImg.raycastTarget = false;
-            rays = raysImg.rectTransform;
-
-            var t = MakeText(panel.rectTransform, "Title", title, 190, Color.white);
-            t.fontStyle = FontStyles.Bold;
-            Anchor(t.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0, 170), new Vector2(1500, 260));
-
-            if (stars)
-            {
-                for (int i = 0; i < 3; i++)
-                {
-                    var s = MakeImage(panel.rectTransform, "Star" + (i + 1), new Color(1f, 0.85f, 0.15f));
-                    s.sprite = circle;
-                    Anchor(s.rectTransform, new Vector2(0.5f, 0.5f), new Vector2((i - 1) * 200, -40 + (i == 1 ? 30 : 0)), new Vector2(150, 150));
-                }
-            }
-            var subText = MakeText(panel.rectTransform, "Sub", sub, 60, Color.white);
-            Anchor(subText.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0, -200), new Vector2(1400, 100));
-
-            home = MakeButton(panel.rectTransform, "HomeButton", "HOME", new Vector2(0f, 1f), new Vector2(150, -90), new Vector2(220, 100), new Color(1f, 0.8f, 0.25f));
-            panel.gameObject.SetActive(false);
-            return panel.rectTransform;
         }
 
         private static RectTransform MakePopPrefab(string name, string text, Color color, float size)
         {
             string dir = "Assets/Prefabs/TugPops";
             Directory.CreateDirectory(dir);
-            var go = new GameObject(name, typeof(RectTransform), typeof(CanvasGroup));
-            var rt = (RectTransform)go.transform;
-            rt.sizeDelta = new Vector2(600, 140);
-            var t = go.AddComponent<TextMeshProUGUI>();
-            t.text = text; t.fontSize = size; t.color = color; t.fontStyle = FontStyles.Bold;
-            t.alignment = TextAlignmentOptions.Center; t.raycastTarget = false;
-            var prefab = PrefabUtility.SaveAsPrefabAsset(go, dir + "/" + name + ".prefab");
-            Object.DestroyImmediate(go);
+            var t = MakeText(null, name, text, size, color, new Vector2(600, 140));
+            t.fontStyle = FontStyles.Bold;
+            Anchor(t.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(600, 140));
+            t.gameObject.AddComponent<CanvasGroup>();
+            var prefab = PrefabUtility.SaveAsPrefabAsset(t.gameObject, dir + "/" + name + ".prefab");
+            Object.DestroyImmediate(t.gameObject);
             return (RectTransform)prefab.transform;
         }
 
-        private static void WireUI(TugBattleUI ui, TMP_Text countdown, RectTransform[] banners, RectTransform[] pops, RectTransform popParent,
-            RectTransform popAnchor, Image fill, GameObject glow, RectTransform meter, TMP_Text levelText, Button pauseButton,
-            GameObject pausePanel, Button resumeButton, Button homeButton)
+        private static void WireUI(TugBattleUI ui, RectTransform countdownRoot, TMP_Text countdownText, RectTransform[] banners, RectTransform[] pops,
+            RectTransform popParent, RectTransform popAnchor, Image fill, GameObject glow, RectTransform meter)
         {
             var so = new SerializedObject(ui);
-            so.FindProperty("countdownText").objectReferenceValue = countdown;
+            so.FindProperty("countdownRoot").objectReferenceValue = countdownRoot;
+            so.FindProperty("countdownText").objectReferenceValue = countdownText;
             var b = so.FindProperty("banners");
             b.arraySize = banners.Length;
             for (int i = 0; i < banners.Length; i++)
@@ -282,35 +316,24 @@ namespace tmkoc.tugofwar.EditorTools
             so.FindProperty("powerFill").objectReferenceValue = fill;
             so.FindProperty("powerFullGlow").objectReferenceValue = glow;
             so.FindProperty("powerMeterRoot").objectReferenceValue = meter;
-            so.FindProperty("levelText").objectReferenceValue = levelText;
-            so.FindProperty("pauseButton").objectReferenceValue = pauseButton;
-            so.FindProperty("pausePanel").objectReferenceValue = pausePanel;
-            so.FindProperty("resumeButton").objectReferenceValue = resumeButton;
-            so.FindProperty("homeButton").objectReferenceValue = homeButton;
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
         // ================================================================== small helpers
 
-        private static SpriteRenderer MakeSprite(Transform parent, string name, Vector2 pos, Vector2 size, Color color, Sprite sprite, int order, bool local = false)
+        /// <summary>Placeholder rectangle/circle: Image centred at an anchored position.</summary>
+        private static Image Box(Transform parent, string name, Vector2 pos, Vector2 size, Color color, Sprite sprite = null)
         {
-            var go = new GameObject(name);
-            go.transform.SetParent(parent, false);
-            go.transform.localPosition = pos;
-            var sr = go.AddComponent<SpriteRenderer>();
-            sr.sprite = sprite;
-            sr.color = color;
-            sr.sortingOrder = order;
-            Vector2 native = sprite.bounds.size;
-            // keep child sizes independent of a scaled parent: parents here are never scaled
-            go.transform.localScale = new Vector3(size.x / native.x, size.y / native.y, 1f);
-            return sr;
+            var img = MakeImage(parent, name, color);
+            if (sprite != null) { img.sprite = sprite; img.type = UnityEngine.UI.Image.Type.Simple; }
+            Anchor(img.rectTransform, new Vector2(0.5f, 0.5f), pos, size);
+            return img;
         }
 
         private static RectTransform NewUI(string name, Transform parent)
         {
             var go = new GameObject(name, typeof(RectTransform));
-            go.transform.SetParent(parent, false);
+            if (parent != null) go.transform.SetParent(parent, false);
             return (RectTransform)go.transform;
         }
 
@@ -339,27 +362,24 @@ namespace tmkoc.tugofwar.EditorTools
             return img;
         }
 
-        private static TextMeshProUGUI MakeText(Transform parent, string name, string text, float size, Color color)
+        /// <summary>Fredoka, no wrapping, auto-sized to fit its box (never larger than <paramref name="size"/>).</summary>
+        private static TextMeshProUGUI MakeText(Transform parent, string name, string text, float size, Color color, Vector2 box)
         {
             var rt = NewUI(name, parent);
+            rt.sizeDelta = box;
             var t = rt.gameObject.AddComponent<TextMeshProUGUI>();
-            t.text = text; t.fontSize = size; t.color = color;
+            if (fredoka != null) t.font = fredoka;
+            t.text = text;
+            t.color = color;
             t.alignment = TextAlignmentOptions.Center;
             t.raycastTarget = false;
+            t.textWrappingMode = TextWrappingModes.NoWrap;
+            t.overflowMode = TextOverflowModes.Overflow;
+            t.enableAutoSizing = true;
+            t.fontSizeMax = size;
+            t.fontSizeMin = Mathf.Max(12f, size * 0.4f);
+            t.fontSize = size;
             return t;
-        }
-
-        private static Button MakeButton(Transform parent, string name, string label, Vector2 anchor, Vector2 pos, Vector2 size, Color color)
-        {
-            var img = MakeImage(parent, name, color);
-            img.raycastTarget = true;
-            Anchor(img.rectTransform, anchor, pos, size);
-            var btn = img.gameObject.AddComponent<Button>();
-            btn.targetGraphic = img;
-            var t = MakeText(img.rectTransform, "Label", label, 54, new Color(0.2f, 0.15f, 0.3f));
-            t.fontStyle = FontStyles.Bold;
-            Stretch(t.rectTransform);
-            return btn;
         }
 
         private static Canvas FindMainCanvas()
@@ -378,10 +398,7 @@ namespace tmkoc.tugofwar.EditorTools
         private static void EnsureInputModule()
         {
             var es = Object.FindFirstObjectByType<EventSystem>();
-            if (es == null)
-            {
-                es = new GameObject("EventSystem", typeof(EventSystem)).GetComponent<EventSystem>();
-            }
+            if (es == null) es = new GameObject("EventSystem", typeof(EventSystem)).GetComponent<EventSystem>();
 #if ENABLE_LEGACY_INPUT_MANAGER && !ENABLE_INPUT_SYSTEM
             foreach (var m in es.GetComponents<BaseInputModule>())
                 if (m.GetType().Name == "InputSystemUIInputModule") Object.DestroyImmediate(m);
@@ -413,6 +430,7 @@ namespace tmkoc.tugofwar.EditorTools
         {
             var so = new SerializedObject(target);
             var p = so.FindProperty(prop);
+            if (p == null) { Debug.LogError("TugBattleSceneBuilder: no field '" + prop + "' on " + target.GetType().Name); return; }
             p.arraySize = values.Length;
             for (int i = 0; i < values.Length; i++) p.GetArrayElementAtIndex(i).objectReferenceValue = values[i];
             so.ApplyModifiedPropertiesWithoutUndo();

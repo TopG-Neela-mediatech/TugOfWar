@@ -34,6 +34,10 @@ namespace tmkoc.tugofwar
 
         [Header("Rope")]
         [SerializeField] private float nearWinRope = 62f;
+        [Tooltip("Level 1 intro: the Pet does not pull until the flag is this far (rope %) toward the Player.")]
+        [SerializeField] private float introGoalRope = 25f;
+        [Tooltip("Level 1 intro: show the tap hint again if the player stops tapping for this long.")]
+        [SerializeField] private float introIdleHint = 3f;
         [SerializeField] private float finalPushRope = 70f;
         [SerializeField] private float rubberBand = 7f;
         [SerializeField] private float countdownStep = 0.75f;
@@ -51,7 +55,6 @@ namespace tmkoc.tugofwar
         private float power, powerT;
         private TapTier lastTier;
         private bool playerWon;
-        private MatchState stateBeforePause;
 
         // countdown
         private int cdStep;
@@ -61,25 +64,16 @@ namespace tmkoc.tugofwar
         private float effortAt, popAt, voiceAt, alertAt, tensionAt, firstTapPromptUntil;
         private bool tappedOnce, meterFullPlayed, finalPush, dangerZone, safeZone;
         private float endTimer;
+        private bool introActive;
 
         private void Awake()
         {
             petBot.StateChanged += OnPetStateChanged;
-            if (ui != null)
-            {
-                ui.PauseClicked += Pause;
-                ui.ResumeClicked += Resume;
-            }
         }
 
         private void OnDestroy()
         {
             petBot.StateChanged -= OnPetStateChanged;
-            if (ui != null)
-            {
-                ui.PauseClicked -= Pause;
-                ui.ResumeClicked -= Resume;
-            }
         }
 
         // ------------------------------------------------------------------ Flow
@@ -89,6 +83,7 @@ namespace tmkoc.tugofwar
         {
             cfg = config;
             isFinalLevel = isFinal;
+            introActive = levelIndex == 0;   // mandatory tutorial: player pulls ahead before the Pet starts
 
             rope = target = 0f;
             gameTime = 0f;
@@ -101,13 +96,12 @@ namespace tmkoc.tugofwar
             endTimer = 0f;
             playerWon = false;
             petBot.Begin(cfg);
+            Tut(t => t.BeginLevel(levelIndex));
 
             vfx?.StopAll();
             player.ResetTween();
             pet.ResetTween();
             ui.ResetUI();
-            ui.SetLevel(levelIndex);
-            ui.SetPauseButtonVisible(true);
             ApplyVisuals();
             player.SetPose(Pose.Ready, true);
             pet.SetPose(Pose.Ready, true);
@@ -119,28 +113,6 @@ namespace tmkoc.tugofwar
             State = MatchState.Countdown;
             ui.ShowCountdown("3");
             Sound(s => { s.PlayMusic(MusicId.MatchStart); s.PlaySfx(SfxId.Countdown); });
-        }
-
-        public void Pause()
-        {
-            if (State != MatchState.Playing && State != MatchState.Countdown) return;
-            stateBeforePause = State;
-            State = MatchState.Paused;
-            ui.SetPauseVisible(true);
-            Sound(s => s.SetPaused(true));
-        }
-
-        public void Resume()
-        {
-            if (State != MatchState.Paused) return;
-            State = stateBeforePause;
-            ui.SetPauseVisible(false);
-            Sound(s => s.SetPaused(false));
-        }
-
-        private void OnApplicationPause(bool paused)
-        {
-            if (paused) Pause();
         }
 
         // ------------------------------------------------------------------ Update
@@ -180,6 +152,7 @@ namespace tmkoc.tugofwar
             {
                 ui.HideCountdown();
                 State = MatchState.Playing;
+                Tut(t => t.OnPlayStart());
                 firstTapPromptUntil = gameTime + 3f;
                 ui.ShowBanner(BannerKind.TapFast);          // Phase 1: teach "Tap Fast!"
                 Sound(s => { s.PlayMusic(MusicId.Gameplay); s.PlayVoice(VoiceId.TapFast); });
@@ -189,10 +162,19 @@ namespace tmkoc.tugofwar
         private void UpdatePlay(float dt)
         {
             gameTime += dt;
-            petBot.Tick(dt);
+            if (introActive)
+            {
+                // Pet waits (and the hint hand keeps showing) until the player has won a little ground
+                if (rope <= -introGoalRope) introActive = false;
+                else if (gameTime - lastTap > introIdleHint) Tut(t => t.Show());
+            }
+            else
+            {
+                petBot.Tick(dt);
+            }
 
-            // Pet pull is suspended during a Power Pull
-            float petForce = powerT > 0f ? 0f : petBot.Pull;
+            // Pet pull is suspended during the intro and during a Power Pull
+            float petForce = (introActive || powerT > 0f) ? 0f : petBot.Pull;
             target += petForce * dt;
 
             if (powerT > 0f)
@@ -205,6 +187,7 @@ namespace tmkoc.tugofwar
 
             target = Mathf.Clamp(target, -108f, 108f);
             rope += (target - rope) * (1f - Mathf.Exp(-dt * rubberBand));
+            Tut(t => t.Tick(rope));
 
             UpdateFeedback(dt);
             ApplyVisuals();
@@ -281,6 +264,7 @@ namespace tmkoc.tugofwar
             if (State != MatchState.Playing) return;
 
             tappedOnce = true;
+            Tut(t => t.NotifyTap());
             taps.Enqueue(gameTime);
             lastTap = gameTime;
 
@@ -389,8 +373,8 @@ namespace tmkoc.tugofwar
             playerWon = won;
             endTimer = 0f;
             State = MatchState.Ending;
+            Tut(t => t.Hide());
             ui.HideBanner();
-            ui.SetPauseButtonVisible(false);
             vfx?.NearWinGlow(false);
 
             if (won)
@@ -486,6 +470,7 @@ namespace tmkoc.tugofwar
 
         private Pose PetPose()
         {
+            if (introActive) return Pose.Ready;
             switch (petBot.State)
             {
                 case PetState.Warn: return Pose.Ready;
@@ -497,6 +482,12 @@ namespace tmkoc.tugofwar
             if (rope > 40f) return Pose.WinningGround;
             if (rope < -40f) return Pose.LosingGround;
             return Pose.NormalPull;
+        }
+
+        private static void Tut(System.Action<TutorialManager> call)
+        {
+            var tm = GameManager.Instance.TutorialManager;
+            if (tm != null) call(tm);
         }
 
         private static void Sound(System.Action<SoundManager> call)

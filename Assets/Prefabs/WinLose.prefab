@@ -247,7 +247,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &8842798782241696265
 RectTransform:
   m_ObjectHideFlags: 0
@@ -367,7 +367,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &275361049107545438
 RectTransform:
   m_ObjectHideFlags: 0
@@ -882,7 +882,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &3961737263844709500
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1080,7 +1080,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &5893001392220318065
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1382,19 +1382,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66b29fdc8e1cf114ab642fd25e836701, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  winChrachterImage: {fileID: 340745489462420389}
-  loseChrachterImage: {fileID: 2733576555818044008}
   winPanel: {fileID: 3308511736688944995}
   losePanel: {fileID: 9208327022345452724}
-  retryButton: {fileID: 4188338367141879875}
-  nextButton: {fileID: 3791293598004435343}
   homeButtons:
   - {fileID: 1472240854193065873}
   - {fileID: 6203780799117840935}
   winRaysT: {fileID: 2142489775532940139}
   loseRaysT: {fileID: 2218805690966024122}
+  winTitle: {fileID: 0}
+  loseTitle: {fileID: 0}
+  starImages: []
   onScreenAnchoredPos: {x: 0, y: 0}
   slideInDuration: 0.9
   slideOutDuration: 0.5
   slideInEase: 26
   slideOutEase: 26
+  minDisplayTime: 5

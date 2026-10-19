@@ -1,4 +1,3 @@
-using System;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,58 +7,39 @@ namespace tmkoc.tugofwar
     /// <summary>
     /// Moves the whole "rope group" (rope, flag, Player AND Pet as children) left/right as the rope value changes.
     /// Rope value: 0 = centre, -100 = Player Win Line (left), +100 = Pet Win Line (right).
-    /// Win lines themselves stay fixed in the scene.
+    /// Win lines themselves stay fixed in the scene. Only ONE rope sprite is needed - stretch / tension is a tween.
     /// </summary>
     public class RopeView : MonoBehaviour
     {
-        [Serializable]
-        public class RopeSprite
-        {
-            public RopeState state;
-            public Sprite sprite;
-        }
-
         [Header("Movement")]
-        [SerializeField] private Transform ropeRoot;
-        [Tooltip("Distance (local units / pixels) the group travels when rope = 100, i.e. centre -> win line.")]
-        [SerializeField] private float maxOffset = 220f;
+        [SerializeField] private RectTransform ropeRoot;
+        [Tooltip("Canvas pixels the group travels when rope = 100, i.e. centre -> win line.")]
+        [SerializeField] private float maxOffset = 264f;
 
-        [Header("Flag")]
-        [SerializeField] private Transform flag;
+        [Header("Rope + flag")]
+        [SerializeField] private Image ropeImage;
+        [SerializeField] private RectTransform flag;
+        [SerializeField] private Image flagImage;
         [SerializeField] private float flagSwayAngle = 6f;
         [SerializeField] private float flagSwaySpeed = 4f;
 
-        [Header("Rope art (optional)")]
-        [SerializeField] private SpriteRenderer ropeSpriteRenderer;
-        [SerializeField] private Image ropeImage;
-        [SerializeField] private RopeSprite[] ropeSprites;
-
-        private Vector3 startLocalPos;
-        private RectTransform ropeRect;
         private float startAnchoredX;
-        private RopeState state = RopeState.Neutral;
+        private float ropeRestY;
+        private RopeState state = (RopeState)(-1);
         private float strain;
+        private string RopeId => "rope" + GetInstanceID();
 
         private void Awake()
         {
-            ropeRect = ropeRoot as RectTransform;
-            startLocalPos = ropeRoot.localPosition;
-            if (ropeRect != null) startAnchoredX = ropeRect.anchoredPosition.x;
+            startAnchoredX = ropeRoot.anchoredPosition.x;
+            if (ropeImage != null) ropeRestY = ropeImage.rectTransform.localPosition.y;
         }
 
         public void SetRope(float rope)
         {
-            float x = rope / 100f * maxOffset;
-            if (ropeRect != null)
-            {
-                var p = ropeRect.anchoredPosition;
-                p.x = startAnchoredX + x;
-                ropeRect.anchoredPosition = p;
-            }
-            else
-            {
-                ropeRoot.localPosition = new Vector3(startLocalPos.x + x, startLocalPos.y, startLocalPos.z);
-            }
+            var p = ropeRoot.anchoredPosition;
+            p.x = startAnchoredX + rope / 100f * maxOffset;
+            ropeRoot.anchoredPosition = p;
         }
 
         /// <summary>0..1 how hard the rope is being pulled; drives flag sway.</summary>
@@ -72,18 +52,52 @@ namespace tmkoc.tugofwar
             flag.localRotation = Quaternion.Euler(0f, 0f, a);
         }
 
+        /// <summary>Sprites from AssetsSO. Null keeps the placeholder.</summary>
+        public void ApplySprites(Sprite rope, Sprite flagSprite)
+        {
+            if (rope != null && ropeImage != null)
+            {
+                ropeImage.sprite = rope;
+                ropeImage.type = Image.Type.Simple;
+                ropeImage.preserveAspect = true;
+                ropeImage.color = Color.white;
+            }
+            if (flagSprite != null && flagImage != null)
+            {
+                flagImage.sprite = flagSprite;
+                flagImage.type = Image.Type.Simple;
+                flagImage.preserveAspect = true;
+                flagImage.color = Color.white;
+                // hide the placeholder pole/cloth pieces that sit under the flag object
+                foreach (Transform child in flagImage.transform) child.gameObject.SetActive(false);
+            }
+        }
+
+        /// <summary>Rope tension look: thinner and slightly longer as the pull gets harder (tween, no extra sprites).</summary>
         public void SetState(RopeState s)
         {
-            if (s == state) return;
+            if (s == state || ropeImage == null) return;
             state = s;
-            if (ropeSprites == null) return;
-            for (int i = 0; i < ropeSprites.Length; i++)
+
+            Vector3 scale;
+            float shake = 0f;
+            switch (s)
             {
-                if (ropeSprites[i].state != s || ropeSprites[i].sprite == null) continue;
-                if (ropeSpriteRenderer != null) ropeSpriteRenderer.sprite = ropeSprites[i].sprite;
-                if (ropeImage != null) ropeImage.sprite = ropeSprites[i].sprite;
-                return;
+                case RopeState.Stretch: scale = new Vector3(1.03f, 0.75f, 1f); break;
+                case RopeState.StrongPull: scale = new Vector3(1.05f, 0.6f, 1f); shake = 3f; break;
+                case RopeState.PowerPull: scale = new Vector3(1.08f, 0.45f, 1f); shake = 5f; break;
+                case RopeState.PlayerPull:
+                case RopeState.PetPull: scale = new Vector3(1.01f, 0.92f, 1f); break;
+                default: scale = Vector3.one; break;
             }
+
+            var rt = ropeImage.rectTransform;
+            DOTween.Kill(RopeId);
+            rt.DOScale(scale, 0.12f).SetEase(Ease.OutQuad).SetId(RopeId);
+            if (shake > 0f)
+                rt.DOLocalMoveY(ropeRestY + shake, 0.05f).SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo).SetId(RopeId);
+            else
+                rt.DOLocalMoveY(ropeRestY, 0.12f).SetId(RopeId);
         }
 
         public void FlagShake(float strength = 1f)
@@ -95,6 +109,7 @@ namespace tmkoc.tugofwar
 
         private void OnDisable()
         {
+            DOTween.Kill(RopeId);
             if (flag != null) flag.DOKill();
         }
     }

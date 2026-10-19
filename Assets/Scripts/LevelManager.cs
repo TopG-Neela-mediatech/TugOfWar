@@ -13,9 +13,12 @@ namespace tmkoc.tugofwar
         [Tooltip("One entry per level. Leave empty to use the 5 default levels.")]
         [SerializeField] private TugLevelConfig[] levelConfigs;
         [SerializeField] private float resultPanelDelay = 1f;
+        [Tooltip("Story prefab (3 slides + Skip). Shown only when the game starts from level 1.")]
+        [SerializeField] private StoryController storyController;
 
         public int currentLevelIndex { get; private set; }
         public bool HasLevelStarted { get; private set; }
+        public bool IsFinalLevel => currentLevelIndex == TotalLevels - 1;
         private int TotalLevels => levelConfigs.Length;
         private bool isRetry;
 
@@ -36,6 +39,23 @@ namespace tmkoc.tugofwar
             GameManager.Instance.OnLevelStart += OnLevelStart;
             GameManager.Instance.OnLevelWin += OnLevelWin;
             GameManager.Instance.OnLevelLose += OnLevelLose;
+
+            // Progress comes from HelperGameCategoryDataSaver: starting from level 1 plays the story first,
+            // resuming from any other level goes straight into that level.
+            if (currentLevelIndex == 0 && storyController != null)
+            {
+                storyController.OnStoryFinished += OnStoryFinished;
+                storyController.gameObject.SetActive(true);
+            }
+            else
+            {
+                StartLevel();
+            }
+        }
+        private void OnStoryFinished()
+        {
+            storyController.OnStoryFinished -= OnStoryFinished;
+            storyController.gameObject.SetActive(false);
             StartLevel();
         }
         private void OnLevelStart()
@@ -75,25 +95,28 @@ namespace tmkoc.tugofwar
             HelperGameCategoryDataSaver.Init(TotalLevels);
             currentLevelIndex = HelperGameCategoryDataSaver.GetStartLevel();
         }
-        private void SaveLevel()
+        /// <returns>True when every level has been won and the game is being ended/restarted.</returns>
+        private bool SaveLevel()
         {
             currentLevelIndex++;
             // Saved even past the last level; GetStartLevel() wraps a saved index >= level count back to 0.
             HelperGameCategoryDataSaver.LevelCompleted(currentLevelIndex);
-            if (currentLevelIndex >= TotalLevels)
-            {
+            if (currentLevelIndex < TotalLevels) return false;
+
 #if PLAYSCHOOL_MAIN
-                    EffectParticleControll.Instance.SpawnGameEndPanel();
-                    GameOverEndPanel.Instance.AddTheListnerRetryGame();
-                    return;
+                EffectParticleControll.Instance.SpawnGameEndPanel();
+                GameOverEndPanel.Instance.AddTheListnerRetryGame();
+                return true;
+#else
+            // Not running inside Playschool Main: restart the whole game (story included) from level 1.
+            currentLevelIndex = 0;
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            return true;
 #endif
-                currentLevelIndex = 0;
-                return;
-            }
         }
         public void LoadNextLevel()
         {
-            SaveLevel();
+            if (SaveLevel()) return;
             RestartLevel();
         }
         public void RetryLevel()
@@ -119,6 +142,7 @@ namespace tmkoc.tugofwar
             GameManager.Instance.OnLevelStart -= OnLevelStart;
             GameManager.Instance.OnLevelWin -= OnLevelWin;
             GameManager.Instance.OnLevelLose -= OnLevelLose;
+            if (storyController != null) storyController.OnStoryFinished -= OnStoryFinished;
         }
     }
 }

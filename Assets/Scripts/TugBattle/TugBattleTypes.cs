@@ -47,11 +47,12 @@ namespace tmkoc.tugofwar
         {
             return new[]
             {
-                New(6f,  1.8f, 7f,   9f,   .85f, 1.6f, 3.2f),
-                New(10f, 2.0f, 6f,   8f,   .75f, 1.9f, 2.8f),
-                New(14f, 2.1f, 4.5f, 6f,   .65f, 2.1f, 2.3f),
-                New(18f, 2.3f, 4f,   5.5f, .6f,  2.3f, 1.6f),
-                New(23f, 2.5f, 3.2f, 4.5f, .5f,  2.6f, 1.3f),
+                //  pull  strong  gap(min,max)   warn  strongDur  tired
+                New(6f,    1.8f,  7f,   9f,      .85f, 1.6f,      3.2f),    // 1: gentle (intro)
+                New(14.5f, 2.15f, 5.1f, 6.75f,   .68f, 2.1f,      2.25f),   // 2: halfway to level 3
+                New(23f,   2.5f,  3.2f, 4.5f,    .5f,  2.6f,      1.3f),    // 3: hard (was the old level 5)
+                New(26f,   2.6f,  2.9f, 4f,      .45f, 2.8f,      1.1f),    // 4: harder
+                New(29f,   2.7f,  2.6f, 3.6f,    .4f,  3f,        .9f),     // 5: hardest
             };
         }
 
