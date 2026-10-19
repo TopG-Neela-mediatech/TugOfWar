@@ -32,6 +32,7 @@ namespace tmkoc.tugofwar.EditorTools
         private const float PetStartX = 528f;
         private const float FeetY = -330f;
         private const float HandsY = -210f;
+        private const float HalfH = 540f;   // half the 1080 reference height: converts a centre-based y into a bottom-based y
 
         private static Sprite square;
         private static Sprite circle;
@@ -110,11 +111,13 @@ namespace tmkoc.tugofwar.EditorTools
             ground.rectTransform.offsetMin = Vector2.zero;
             ground.rectTransform.offsetMax = new Vector2(0, 220f);
 
-            var playerLine = Box(game, "PlayerWinLine", new Vector2(-WinLineX, -120), new Vector2(18, 440), new Color(0.3f, 0.6f, 1f));
-            var petLine = Box(game, "PetWinLine", new Vector2(WinLineX, -120), new Vector2(18, 440), new Color(1f, 0.3f, 0.45f));
+            var playerLine = Box(game, "PlayerWinLine", new Vector2(-WinLineX, -120 + HalfH), new Vector2(18, 440), new Color(0.3f, 0.6f, 1f));
+            BottomCentre(playerLine.rectTransform);
+            var petLine = Box(game, "PetWinLine", new Vector2(WinLineX, -120 + HalfH), new Vector2(18, 440), new Color(1f, 0.3f, 0.45f));
+            BottomCentre(petLine.rectTransform);
 
             var group = NewUI("RopeGroup", game);
-            Anchor(group, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
+            Anchor(group, new Vector2(0.5f, 0f), new Vector2(0f, HalfH), Vector2.zero);   // bottom-centre: stays on the ground on every aspect ratio
 
             var rope = Box(group, "Rope", new Vector2(0, HandsY), new Vector2(1120, 14), new Color(0.75f, 0.5f, 0.25f));
 
@@ -167,7 +170,7 @@ namespace tmkoc.tugofwar.EditorTools
             {
                 var bt = MakeText(hud, "Banner_" + (BannerKind)i, bannerText[i], 110, bannerColor[i], new Vector2(1500, 160));
                 bt.fontStyle = FontStyles.Bold;
-                Anchor(bt.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0, 330), new Vector2(1500, 160));
+                Anchor(bt.rectTransform, new Vector2(0.5f, 1f), new Vector2(0, 330 - HalfH), new Vector2(1500, 160));   // top-centre
                 bt.gameObject.SetActive(false);
                 banners[i] = bt.rectTransform;
             }
@@ -176,7 +179,7 @@ namespace tmkoc.tugofwar.EditorTools
             var popParent = NewUI("PopParent", hud);
             Stretch(popParent);
             var popAnchor = NewUI("PopAnchor", hud);
-            Anchor(popAnchor, new Vector2(0.5f, 0.5f), new Vector2(-480, 120), new Vector2(10, 10));
+            Anchor(popAnchor, new Vector2(0.5f, 0f), new Vector2(-480, 120 + HalfH), new Vector2(10, 10));   // bottom-centre, above the player
             string[] popText = { "Good!", "Great!", "Super Pull!" };
             Color[] popColor = { new Color(0.3f, 0.65f, 1f), new Color(0.3f, 0.8f, 0.4f), new Color(1f, 0.3f, 0.4f) };
             var popPrefabs = new RectTransform[3];
@@ -188,7 +191,7 @@ namespace tmkoc.tugofwar.EditorTools
             var handImg = MakeImage(hud, "TutorialHand", new Color(0.96f, 0.79f, 0.64f));
             handImg.sprite = circle;
             handImg.type = UnityEngine.UI.Image.Type.Simple;
-            Anchor(handImg.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0, -150), new Vector2(150, 150));
+            Anchor(handImg.rectTransform, new Vector2(0.5f, 0f), new Vector2(0, -150 + HalfH), new Vector2(150, 150));
             var handGroup = handImg.gameObject.AddComponent<CanvasGroup>();
             handGroup.interactable = false; handGroup.blocksRaycasts = false;
             var rippleImg = MakeImage(handImg.rectTransform, "Ripple", new Color(1, 1, 1, 0));
@@ -218,6 +221,7 @@ namespace tmkoc.tugofwar.EditorTools
             Set(battle, "vfx", vfx);
 
             Set(vfx, "worldCamera", cam);
+            Set(vfx, "shakeTarget", game);
             Set(vfx, "playerWinLine", playerLine.transform);
             Set(vfx, "petWinLine", petLine.transform);
 
@@ -328,6 +332,11 @@ namespace tmkoc.tugofwar.EditorTools
             if (sprite != null) { img.sprite = sprite; img.type = UnityEngine.UI.Image.Type.Simple; }
             Anchor(img.rectTransform, new Vector2(0.5f, 0.5f), pos, size);
             return img;
+        }
+
+        private static void BottomCentre(RectTransform rt)
+        {
+            rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0f);
         }
 
         private static RectTransform NewUI(string name, Transform parent)

@@ -337,7 +337,7 @@ namespace tmkoc.tugofwar
             ui.SetPower(0f);
             ui.ShowBanner(BannerKind.PowerPull, 1.1f);
             vfx?.PowerPullBurst();
-            vfx?.ShakeCamera(0.25f);
+            vfx?.ShakeScreen(18f);
             ui.PunchPowerMeter();
             ropeView.FlagShake(1.2f);
             Sound(s => { s.PlaySfx(SfxId.PowerWhoosh); s.PlayVoice(VoiceId.PowerPull); });

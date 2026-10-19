@@ -31,7 +31,8 @@ namespace tmkoc.tugofwar
         public Pose CurrentPose { get; private set; } = Pose.Idle;
 
         private Vector3 baseScale = Vector3.one;
-        private Vector3 baseLocalPos;
+        private Vector2 baseAnchoredPos;
+        private RectTransform rt;
         private Quaternion baseLocalRot = Quaternion.identity;
         private bool ready;
         private bool hasPose;
@@ -43,7 +44,8 @@ namespace tmkoc.tugofwar
         private void Awake()
         {
             baseScale = Target.localScale;
-            baseLocalPos = Target.localPosition;
+            rt = (RectTransform)Target;
+            baseAnchoredPos = rt.anchoredPosition;
             baseLocalRot = Target.localRotation;
             ready = true;
         }
@@ -114,10 +116,10 @@ namespace tmkoc.tugofwar
                         .SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo).SetId(PoseId);
             });
             t.DOScale(baseScale * f.scale, 0.18f).SetEase(Ease.OutBack).SetId(PoseId);
-            t.DOLocalMoveY(baseLocalPos.y, 0.12f).SetId(PoseId).OnComplete(() =>
+            rt.DOAnchorPosY(baseAnchoredPos.y, 0.12f).SetId(PoseId).OnComplete(() =>
             {
                 if (f.bob > 0.01f)
-                    t.DOLocalMoveY(baseLocalPos.y + f.bob, f.bobTime)
+                    rt.DOAnchorPosY(baseAnchoredPos.y + f.bob, f.bobTime)
                         .SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo).SetId(PoseId);
             });
         }
@@ -140,7 +142,7 @@ namespace tmkoc.tugofwar
             DOTween.Kill(PoseId);
             DOTween.Kill(PunchId);
             Target.localScale = baseScale;
-            Target.localPosition = baseLocalPos;
+            rt.anchoredPosition = baseAnchoredPos;
             Target.localRotation = baseLocalRot;
             hasPose = false;
         }
@@ -152,7 +154,7 @@ namespace tmkoc.tugofwar
             DOTween.Kill(PoseId);
             Target.localScale = baseScale;
             Target.localRotation = baseLocalRot;
-            Target.DOLocalMoveY(baseLocalPos.y + jumpHeight, 0.3f).SetEase(Ease.OutQuad).SetLoops(-1, LoopType.Yoyo);
+            rt.DOAnchorPosY(baseAnchoredPos.y + jumpHeight, 0.3f).SetEase(Ease.OutQuad).SetLoops(-1, LoopType.Yoyo);
             Target.DOLocalRotate(new Vector3(0f, 0f, 8f), 0.3f).SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo);
         }
 
@@ -163,13 +165,13 @@ namespace tmkoc.tugofwar
             DOTween.Kill(PoseId);
             Target.localScale = baseScale;
             Target.DOLocalRotate(new Vector3(0f, 0f, 14f * leanDirection), 0.5f).SetEase(Ease.OutBack);
-            Target.DOLocalMoveY(baseLocalPos.y - jumpHeight * 0.4f, 0.5f).SetEase(Ease.OutBounce);
+            rt.DOAnchorPosY(baseAnchoredPos.y - jumpHeight * 0.4f, 0.5f).SetEase(Ease.OutBounce);
         }
 
         /// <summary>Pet sliding forward while still holding the rope.</summary>
         public void SlideForward()
         {
-            Target.DOLocalMoveX(baseLocalPos.x + slideX, 0.6f).SetEase(Ease.OutCubic);
+            rt.DOAnchorPosX(baseAnchoredPos.x + slideX, 0.6f).SetEase(Ease.OutCubic);
         }
 
         private void OnDisable()

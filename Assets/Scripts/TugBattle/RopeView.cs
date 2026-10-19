@@ -32,7 +32,7 @@ namespace tmkoc.tugofwar
         private void Awake()
         {
             startAnchoredX = ropeRoot.anchoredPosition.x;
-            if (ropeImage != null) ropeRestY = ropeImage.rectTransform.localPosition.y;
+            if (ropeImage != null) ropeRestY = ropeImage.rectTransform.anchoredPosition.y;
         }
 
         public void SetRope(float rope)
@@ -95,9 +95,9 @@ namespace tmkoc.tugofwar
             DOTween.Kill(RopeId);
             rt.DOScale(scale, 0.12f).SetEase(Ease.OutQuad).SetId(RopeId);
             if (shake > 0f)
-                rt.DOLocalMoveY(ropeRestY + shake, 0.05f).SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo).SetId(RopeId);
+                rt.DOAnchorPosY(ropeRestY + shake, 0.05f).SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo).SetId(RopeId);
             else
-                rt.DOLocalMoveY(ropeRestY, 0.12f).SetId(RopeId);
+                rt.DOAnchorPosY(ropeRestY, 0.12f).SetId(RopeId);
         }
 
         public void FlagShake(float strength = 1f)

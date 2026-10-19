@@ -133,7 +133,9 @@ namespace tmkoc.tugofwar
             {
                 if (pops[i].kind != kind || pops[i].prefab == null) continue;
                 var pop = Instantiate(pops[i].prefab, popParent);
-                Vector2 basePos = popAnchor != null ? popAnchor.anchoredPosition : Vector2.zero;
+                // PopAnchor may be anchored anywhere (e.g. bottom-centre): convert its position into popParent space
+                Vector2 basePos = Vector2.zero;
+                if (popAnchor != null) basePos = popParent.InverseTransformPoint(popAnchor.position);
                 pop.anchoredPosition = basePos + new Vector2(UnityEngine.Random.Range(-40f, 60f), 0f);
                 pop.localScale = Vector3.one * 0.5f;
 

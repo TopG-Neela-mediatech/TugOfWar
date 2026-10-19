@@ -38,26 +38,27 @@ namespace tmkoc.tugofwar
         [Header("Tween effects")]
         [SerializeField] private Transform playerWinLine;
         [SerializeField] private Transform petWinLine;
+        [Tooltip("Canvas object shaken on Power Pull (the whole game root). Shaking the camera would not move a Screen Space - Camera canvas.")]
+        [SerializeField] private RectTransform shakeTarget;
 
         private Camera Cam => worldCamera != null ? worldCamera : Camera.main;
-        private Vector3 camStart;
-        private bool hasCamStart;
+        private Vector2 shakeRest;
         private Vector3 playerLineScale = Vector3.one, petLineScale = Vector3.one;
 
         private void Awake()
         {
-            if (Cam != null) { camStart = Cam.transform.localPosition; hasCamStart = true; }
+            if (shakeTarget != null) shakeRest = shakeTarget.anchoredPosition;
             if (playerWinLine != null) playerLineScale = playerWinLine.localScale;
             if (petWinLine != null) petLineScale = petWinLine.localScale;
         }
 
-        public void ShakeCamera(float strength = 0.3f, float time = 0.3f)
+        /// <param name="strength">Canvas pixels.</param>
+        public void ShakeScreen(float strength = 18f, float time = 0.3f)
         {
-            if (!hasCamStart || Cam == null) return;
-            var t = Cam.transform;
-            t.DOKill();
-            t.localPosition = camStart;
-            t.DOShakePosition(time, strength, 25, 90f).OnComplete(() => t.localPosition = camStart);
+            if (shakeTarget == null) return;
+            shakeTarget.DOKill();
+            shakeTarget.anchoredPosition = shakeRest;
+            shakeTarget.DOShakeAnchorPos(time, strength, 25, 90f).OnComplete(() => shakeTarget.anchoredPosition = shakeRest);
         }
 
         private void PulseLine(Transform line, Vector3 baseScale, bool on)
