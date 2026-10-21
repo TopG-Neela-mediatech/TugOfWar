@@ -110,23 +110,23 @@ namespace tmkoc.tugofwar.EditorTools
             ground.rectTransform.pivot = new Vector2(0.5f, 0);
             ground.rectTransform.offsetMin = Vector2.zero;
             ground.rectTransform.offsetMax = new Vector2(0, 220f);
+            ground.gameObject.SetActive(false);   // the HTML ground is part of the background art
 
-            var playerLine = Box(game, "PlayerWinLine", new Vector2(-WinLineX, -120 + HalfH), new Vector2(18, 440), new Color(0.3f, 0.6f, 1f));
+            var playerLine = Box(game, "PlayerWinLine", new Vector2(-WinLineX, 257), new Vector2(28, 254), new Color(0.3f, 0.6f, 1f));
             BottomCentre(playerLine.rectTransform);
-            var petLine = Box(game, "PetWinLine", new Vector2(WinLineX, -120 + HalfH), new Vector2(18, 440), new Color(1f, 0.3f, 0.45f));
+            var petLine = Box(game, "PetWinLine", new Vector2(WinLineX, 257), new Vector2(28, 254), new Color(1f, 0.3f, 0.45f));
             BottomCentre(petLine.rectTransform);
 
             var group = NewUI("RopeGroup", game);
-            Anchor(group, new Vector2(0.5f, 0f), new Vector2(0f, HalfH), Vector2.zero);   // bottom-centre: stays on the ground on every aspect ratio
+            Anchor(group, new Vector2(0.5f, 0f), Vector2.zero, Vector2.zero);   // bottom-centre: stays on the ground on every aspect ratio
 
-            var rope = Box(group, "Rope", new Vector2(0, HandsY), new Vector2(1120, 14), new Color(0.75f, 0.5f, 0.25f));
+            var rope = Box(group, "Rope", new Vector2(-25, 336), new Vector2(850, 24), new Color(0.75f, 0.5f, 0.25f));
 
-            var flag = Box(group, "Flag", new Vector2(0, HandsY + 70), new Vector2(110, 140), new Color(1, 1, 1, 0));
-            Box(flag.rectTransform, "Pole", new Vector2(0, 0), new Vector2(8, 140), new Color(0.35f, 0.25f, 0.2f));
-            Box(flag.rectTransform, "Cloth", new Vector2(34, 46), new Vector2(60, 38), new Color(1f, 0.3f, 0.35f));
+            var flag = Box(group, "Flag", new Vector2(0, 336), new Vector2(62, 94), new Color(1f, 0.3f, 0.35f));
+            flag.rectTransform.pivot = new Vector2(0.5f, 1f);   // hangs from the rope, sways from the knot
 
-            var playerView = BuildCharacter(group, "Player", new Vector2(PlayerStartX, FeetY + 130), new Vector2(160, 260), new Color(1f, 0.44f, 0.57f), 0f, 1);
-            var petView = BuildCharacter(group, "Pet", new Vector2(PetStartX, FeetY + 75), new Vector2(240, 150), new Color(0.97f, 0.65f, 0.3f), -80f, -1);
+            var playerView = BuildCharacter(group, "Player", new Vector2(PlayerStartX + 18f, 396), new Vector2(260, 384), new Color(1f, 0.44f, 0.57f), 0f, 1);
+            var petView = BuildCharacter(group, "Pet", new Vector2(PetStartX, 321), new Vector2(313, 234), new Color(0.97f, 0.65f, 0.3f), -80f, -1);
 
             var ropeView = group.gameObject.AddComponent<RopeView>();
             Set(ropeView, "ropeRoot", group);
@@ -141,7 +141,7 @@ namespace tmkoc.tugofwar.EditorTools
             var ui = hud.gameObject.AddComponent<TugBattleUI>();
 
             var meter = NewUI("PowerMeter", hud);
-            Anchor(meter, new Vector2(0.5f, 0f), new Vector2(0, 90), new Vector2(820, 64));
+            Anchor(meter, new Vector2(0.5f, 0f), new Vector2(0, 71), new Vector2(576, 58));
             var glow = MakeImage(meter, "Glow", new Color(1f, 0.85f, 0.2f, 0.45f));
             Stretch(glow.rectTransform, -14);
             glow.gameObject.SetActive(false);
@@ -157,8 +157,8 @@ namespace tmkoc.tugofwar.EditorTools
             Anchor(meterLabel.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(300, 50));
 
             // countdown (text)
-            var countdownText = MakeText(hud, "Countdown", "3", 320, new Color(1f, 0.95f, 0.4f), new Vector2(700, 420));
-            Anchor(countdownText.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0, 80), new Vector2(700, 420));
+            var countdownText = MakeText(hud, "Countdown", "3", 307, new Color(1f, 0.95f, 0.4f), new Vector2(700, 420));
+            Anchor(countdownText.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0, 115), new Vector2(700, 420));
             countdownText.fontStyle = FontStyles.Bold;
             countdownText.gameObject.SetActive(false);
 
@@ -168,9 +168,9 @@ namespace tmkoc.tugofwar.EditorTools
             var banners = new RectTransform[5];
             for (int i = 0; i < 5; i++)
             {
-                var bt = MakeText(hud, "Banner_" + (BannerKind)i, bannerText[i], 110, bannerColor[i], new Vector2(1500, 160));
+                var bt = MakeText(hud, "Banner_" + (BannerKind)i, bannerText[i], i == 4 ? 123 : 100, bannerColor[i], new Vector2(1500, 130));
                 bt.fontStyle = FontStyles.Bold;
-                Anchor(bt.rectTransform, new Vector2(0.5f, 1f), new Vector2(0, 330 - HalfH), new Vector2(1500, 160));   // top-centre
+                Anchor(bt.rectTransform, new Vector2(0.5f, 1f), new Vector2(0, -190), new Vector2(1500, 130));   // top-centre
                 bt.gameObject.SetActive(false);
                 banners[i] = bt.rectTransform;
             }
@@ -179,13 +179,14 @@ namespace tmkoc.tugofwar.EditorTools
             var popParent = NewUI("PopParent", hud);
             Stretch(popParent);
             var popAnchor = NewUI("PopAnchor", hud);
-            Anchor(popAnchor, new Vector2(0.5f, 0f), new Vector2(-480, 120 + HalfH), new Vector2(10, 10));   // bottom-centre, above the player
+            Anchor(popAnchor, new Vector2(0.5f, 0f), new Vector2(-438, 648), new Vector2(10, 10));   // bottom-centre, above the player
             string[] popText = { "Good!", "Great!", "Super Pull!" };
             Color[] popColor = { new Color(0.3f, 0.65f, 1f), new Color(0.3f, 0.8f, 0.4f), new Color(1f, 0.3f, 0.4f) };
             var popPrefabs = new RectTransform[3];
-            for (int i = 0; i < 3; i++) popPrefabs[i] = MakePopPrefab("Pop_" + (PopKind)i, popText[i], popColor[i], 70 + i * 10);
+            for (int i = 0; i < 3; i++) popPrefabs[i] = MakePopPrefab("Pop_" + (PopKind)i, popText[i], popColor[i], 53 + i * 9.5f);
 
             WireUI(ui, countdownText.rectTransform, countdownText, banners, popPrefabs, popParent, popAnchor, fill, glow.gameObject, meter);
+            SetFloat(ui, "popRise", 76f);   // HTML: floats rise 70 px/s for 0.9 s at 1.2x
 
             // ------------------------------------------------------------ tutorial hand (UI) + manager
             var handImg = MakeImage(hud, "TutorialHand", new Color(0.96f, 0.79f, 0.64f));
