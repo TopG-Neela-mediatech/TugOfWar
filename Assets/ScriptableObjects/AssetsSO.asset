@@ -18,6 +18,12 @@ MonoBehaviour:
   petWinLine: {fileID: 0}
   rope: {fileID: 21300000, guid: dd0fc4ede0068724b8c47519a34a1a3e, type: 3}
   centreFlag: {fileID: 21300000, guid: 7084997bebd96974aaa4ee49785a136b, type: 3}
-  player: {fileID: 0}
-  pet: {fileID: 0}
+  playerBody: {fileID: 21300000, guid: c0d3c19d84a80184892ca4b9c658ae3d, type: 3}
+  playerFaceHappy: {fileID: 21300000, guid: c51bb2b9141fe8b4683a7b0bef1d594a, type: 3}
+  playerFaceStruggle: {fileID: 21300000, guid: 6df4e7dae23923d4e8fa3ea5827d45e6, type: 3}
+  playerFaceWorried: {fileID: 21300000, guid: 4f67b6895142d8245b411ff5919936fb, type: 3}
+  petBody: {fileID: 21300000, guid: abe1ed528c321a04bbac04eea3e8e4a0, type: 3}
+  petFaceDetermined: {fileID: 21300000, guid: 5d9f67398c5af1040a8dda73be5b3aaf, type: 3}
+  petFaceStruggle: {fileID: 21300000, guid: 1eec0a9921872cf4bbd478434abc2fb5, type: 3}
+  petFaceSad: {fileID: 21300000, guid: 4b68cde97e2eaaf4aba8607d77b55eb0, type: 3}
   tutorialHand: {fileID: 5983672484659680106, guid: e487ab1ec3909814fbd0b2e0e8cafbb3, type: 3}

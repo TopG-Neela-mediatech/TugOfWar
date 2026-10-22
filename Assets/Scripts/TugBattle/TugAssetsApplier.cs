@@ -4,24 +4,17 @@ using UnityEngine.UI;
 namespace tmkoc.tugofwar
 {
     /// <summary>
-    /// Pushes the sprites from GameManager.Assets (AssetsSO) into the scene when it loads.
-    /// Every slot you leave empty in AssetsSO simply keeps the placeholder shape.
+    /// Pushes the character art (bodies + faces) and the tutorial hand from GameManager.Assets (AssetsSO) into the scene.
+    /// Scene art (background, ground, win lines, rope, flag) is never touched: whatever you assign in the editor stays.
     /// </summary>
     public class TugAssetsApplier : MonoBehaviour
     {
         [SerializeField] private GameManager gameManager;
 
         [Header("Targets")]
-        [SerializeField] private RopeView ropeView;
         [SerializeField] private CharacterView player;
         [SerializeField] private CharacterView pet;
         [SerializeField] private TutorialManager tutorial;
-
-        [Header("Scene images")]
-        [SerializeField] private Image backgroundImage;
-        [SerializeField] private Image groundImage;
-        [SerializeField] private Image playerWinLineImage;
-        [SerializeField] private Image petWinLineImage;
 
         private void Awake()
         {
@@ -32,24 +25,11 @@ namespace tmkoc.tugofwar
                 return;
             }
 
-            player.SetSprite(a.player);
-            pet.SetSprite(a.pet);
-            ropeView.ApplySprites(a.rope, a.centreFlag);
+            // body + faces. Faces: calm / effort / strain (2nd frame of the strain animation) / sad
+            player.ApplyArt(a.playerBody, a.playerFaceHappy, a.playerFaceStruggle, a.playerFaceWorried, a.playerFaceWorried);
+            pet.ApplyArt(a.petBody, a.petFaceDetermined, a.petFaceStruggle, a.petFaceDetermined, a.petFaceSad);
+
             if (tutorial != null) tutorial.ApplyHand(a.tutorialHand);
-
-            Skin(backgroundImage, a.background);
-            Skin(groundImage, a.ground);
-            Skin(playerWinLineImage, a.playerWinLine);
-            Skin(petWinLineImage, a.petWinLine);
-        }
-
-        private static void Skin(Image img, Sprite sprite)
-        {
-            if (img == null || sprite == null) return;
-            img.sprite = sprite;
-            img.type = Image.Type.Simple;
-            img.preserveAspect = false;
-            img.color = Color.white;
         }
     }
 }

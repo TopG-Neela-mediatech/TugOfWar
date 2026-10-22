@@ -13,8 +13,6 @@ namespace tmkoc.tugofwar
         [Tooltip("One entry per level. Leave empty to use the 5 default levels.")]
         [SerializeField] private TugLevelConfig[] levelConfigs;
         [SerializeField] private float resultPanelDelay = 1f;
-        [Tooltip("Story prefab (3 slides + Skip). Shown only when the game starts from level 1.")]
-        [SerializeField] private StoryController storyController;
 
         public int currentLevelIndex { get; private set; }
         public bool HasLevelStarted { get; private set; }
@@ -40,22 +38,7 @@ namespace tmkoc.tugofwar
             GameManager.Instance.OnLevelWin += OnLevelWin;
             GameManager.Instance.OnLevelLose += OnLevelLose;
 
-            // Progress comes from HelperGameCategoryDataSaver: starting from level 1 plays the story first,
-            // resuming from any other level goes straight into that level.
-            if (currentLevelIndex == 0 && storyController != null)
-            {
-                storyController.OnStoryFinished += OnStoryFinished;
-                storyController.gameObject.SetActive(true);
-            }
-            else
-            {
-                StartLevel();
-            }
-        }
-        private void OnStoryFinished()
-        {
-            storyController.OnStoryFinished -= OnStoryFinished;
-            storyController.gameObject.SetActive(false);
+            // Starts straight away on the level saved by HelperGameCategoryDataSaver (level 1 on a fresh start).
             StartLevel();
         }
         private void OnLevelStart()
@@ -108,7 +91,7 @@ namespace tmkoc.tugofwar
                 GameOverEndPanel.Instance.AddTheListnerRetryGame();
                 return true;
 #else
-            // Not running inside Playschool Main: restart the whole game (story included) from level 1.
+            // Not running inside Playschool Main: restart the whole game from level 1.
             currentLevelIndex = 0;
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
             return true;
@@ -142,7 +125,6 @@ namespace tmkoc.tugofwar
             GameManager.Instance.OnLevelStart -= OnLevelStart;
             GameManager.Instance.OnLevelWin -= OnLevelWin;
             GameManager.Instance.OnLevelLose -= OnLevelLose;
-            if (storyController != null) storyController.OnStoryFinished -= OnStoryFinished;
         }
     }
 }

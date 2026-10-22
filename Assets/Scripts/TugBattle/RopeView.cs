@@ -25,6 +25,7 @@ namespace tmkoc.tugofwar
 
         private float startAnchoredX;
         private float ropeRestY;
+        private Vector2 ropeBaseSize;
         private RopeState state = (RopeState)(-1);
         private float strain;
         private string RopeId => "rope" + GetInstanceID();
@@ -32,7 +33,11 @@ namespace tmkoc.tugofwar
         private void Awake()
         {
             startAnchoredX = ropeRoot.anchoredPosition.x;
-            if (ropeImage != null) ropeRestY = ropeImage.rectTransform.anchoredPosition.y;
+            if (ropeImage != null)
+            {
+                ropeRestY = ropeImage.rectTransform.anchoredPosition.y;
+                ropeBaseSize = ropeImage.rectTransform.sizeDelta;
+            }
         }
 
         public void SetRope(float rope)
@@ -52,27 +57,6 @@ namespace tmkoc.tugofwar
             flag.localRotation = Quaternion.Euler(0f, 0f, a);
         }
 
-        /// <summary>Sprites from AssetsSO. Null keeps the placeholder.</summary>
-        public void ApplySprites(Sprite rope, Sprite flagSprite)
-        {
-            if (rope != null && ropeImage != null)
-            {
-                ropeImage.sprite = rope;
-                ropeImage.type = Image.Type.Simple;
-                ropeImage.preserveAspect = true;
-                ropeImage.color = Color.white;
-            }
-            if (flagSprite != null && flagImage != null)
-            {
-                flagImage.sprite = flagSprite;
-                flagImage.type = Image.Type.Simple;
-                flagImage.preserveAspect = true;
-                flagImage.color = Color.white;
-                // hide the placeholder pole/cloth pieces that sit under the flag object
-                foreach (Transform child in flagImage.transform) child.gameObject.SetActive(false);
-            }
-        }
-
         /// <summary>Rope tension look: thinner and slightly longer as the pull gets harder (tween, no extra sprites).</summary>
         public void SetState(RopeState s)
         {
@@ -83,17 +67,18 @@ namespace tmkoc.tugofwar
             float shake = 0f;
             switch (s)
             {
-                case RopeState.Stretch: scale = new Vector3(1.03f, 0.75f, 1f); break;
-                case RopeState.StrongPull: scale = new Vector3(1.05f, 0.6f, 1f); shake = 3f; break;
-                case RopeState.PowerPull: scale = new Vector3(1.08f, 0.45f, 1f); shake = 5f; break;
+                case RopeState.Stretch: scale = new Vector3(1.03f, 0.88f, 1f); break;
+                case RopeState.StrongPull: scale = new Vector3(1.05f, 0.78f, 1f); shake = 3f; break;
+                case RopeState.PowerPull: scale = new Vector3(1.08f, 0.68f, 1f); shake = 5f; break;
                 case RopeState.PlayerPull:
-                case RopeState.PetPull: scale = new Vector3(1.01f, 0.92f, 1f); break;
+                case RopeState.PetPull: scale = new Vector3(1.01f, 0.95f, 1f); break;
                 default: scale = Vector3.one; break;
             }
 
             var rt = ropeImage.rectTransform;
             DOTween.Kill(RopeId);
-            rt.DOScale(scale, 0.12f).SetEase(Ease.OutQuad).SetId(RopeId);
+            // tension = thinner + slightly longer. Done on the SIZE (not the scale) so a child flag is never squashed.
+            rt.DOSizeDelta(new Vector2(ropeBaseSize.x * scale.x, ropeBaseSize.y * scale.y), 0.12f).SetEase(Ease.OutQuad).SetId(RopeId);
             if (shake > 0f)
                 rt.DOAnchorPosY(ropeRestY + shake, 0.05f).SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo).SetId(RopeId);
             else

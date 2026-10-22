@@ -18,6 +18,8 @@ namespace tmkoc.tugofwar
         [SerializeField] private CharacterView pet;
         [SerializeField] private TugBattleUI ui;
         [SerializeField] private TugBattleVfx vfx;
+        [Tooltip("Shows the winner image + hides rope, characters and lines at the end of a round. Optional: without it the old celebrate / slump on the characters is used.")]
+        [SerializeField] private WinPresenter winPresenter;
 
         [Header("Tap power")]
         [Tooltip("Rope % pulled by one tap at Normal speed.")]
@@ -84,6 +86,7 @@ namespace tmkoc.tugofwar
             cfg = config;
             isFinalLevel = isFinal;
             introActive = levelIndex == 0;   // mandatory tutorial: player pulls ahead before the Pet starts
+            if (winPresenter != null) winPresenter.ResetState();   // win images off, rope / characters / lines back on
 
             rope = target = 0f;
             gameTime = 0f;
@@ -281,7 +284,6 @@ namespace tmkoc.tugofwar
                 effortAt = gameTime;
                 Sound(s => s.PlaySfx(SfxId.PlayerEffort));
                 ropeView.FlagShake(0.6f);
-                vfx?.RopeStretch();
             }
 
             if (tier > lastTier && tier >= TapTier.Fast) Sound(s => s.PlaySfx(SfxId.Combo));
@@ -292,7 +294,6 @@ namespace tmkoc.tugofwar
                 popAt = gameTime;
                 var pop = (PopKind)((int)tier - 1);   // Normal->Good, Fast->Great, Power->Super
                 ui.SpawnPop(pop);
-                vfx?.Pop(pop);
                 if (gameTime - voiceAt > 2.5f)
                 {
                     voiceAt = gameTime;
@@ -322,7 +323,6 @@ namespace tmkoc.tugofwar
             {
                 meterFullPlayed = true;
                 Sound(s => s.PlaySfx(SfxId.MeterFull));
-                vfx?.PowerMeterFull();
             }
             else if (power < 50f) meterFullPlayed = false;
             else if (!meterFullPlayed && Mathf.FloorToInt(power) % 12 == 0)
@@ -399,12 +399,8 @@ namespace tmkoc.tugofwar
             State = MatchState.Result;
             if (playerWon)
             {
-                player.SetPose(Pose.Celebrate);
-                player.Celebrate();
-                pet.SetPose(Pose.Lose);
-                vfx?.VictoryStars();
-                vfx?.Confetti();
-                if (isFinalLevel) vfx?.FinalCelebration();
+                if (winPresenter != null) winPresenter.Show(true);
+                else { player.SetPose(Pose.Celebrate); player.Celebrate(); pet.SetPose(Pose.Lose); }
                 Sound(s =>
                 {
                     s.PlayMusic(isFinalLevel ? MusicId.FinalCelebration : MusicId.Victory, 0.15f);
@@ -417,10 +413,8 @@ namespace tmkoc.tugofwar
             }
             else
             {
-                player.SetPose(Pose.Lose);
-                player.Slump();
-                pet.SetPose(Pose.Celebrate);
-                pet.Celebrate();
+                if (winPresenter != null) winPresenter.Show(false);
+                else { player.SetPose(Pose.Lose); player.Slump(); pet.SetPose(Pose.Celebrate); pet.Celebrate(); }
                 Sound(s =>
                 {
                     s.PlayMusic(MusicId.Lose, 0.15f);

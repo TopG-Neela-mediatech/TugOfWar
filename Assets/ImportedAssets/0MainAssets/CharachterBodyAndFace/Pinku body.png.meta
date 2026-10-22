@@ -1,0 +1,1001 @@
+fileFormatVersion: 2
+guid: c0d3c19d84a80184892ca4b9c658ae3d
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -4057931004275569153
+    second: Pinku body_0
+  - first:
+      213: -8984735690568061544
+    second: Pinku body_1
+  - first:
+      213: -6852977268949111772
+    second: Pinku body_2
+  - first:
+      213: -868952808626135845
+    second: Pinku body_3
+  - first:
+      213: -347783592959719409
+    second: Pinku body_4
+  - first:
+      213: -5232165416814575951
+    second: Pinku body_5
+  - first:
+      213: 3376128116805270822
+    second: Pinku body_6
+  - first:
+      213: 5172043327652301898
+    second: Pinku body_7
+  - first:
+      213: -2221395628173364949
+    second: Pinku body_8
+  - first:
+      213: -6155220215101926894
+    second: Pinku body_9
+  - first:
+      213: -6411170572130241278
+    second: Pinku body_10
+  - first:
+      213: -8967863579554979753
+    second: Pinku body_11
+  - first:
+      213: -2061733723210905044
+    second: Pinku body_12
+  - first:
+      213: -8084974212283570448
+    second: Pinku body_13
+  - first:
+      213: -9183637525816530296
+    second: Pinku body_14
+  - first:
+      213: -2136382560140723243
+    second: Pinku body_15
+  - first:
+      213: 2859285145531510310
+    second: Pinku body_16
+  - first:
+      213: -4035653501288405257
+    second: Pinku body_17
+  - first:
+      213: -8246869131699885984
+    second: Pinku body_18
+  - first:
+      213: -5432985258073046492
+    second: Pinku body_19
+  - first:
+      213: -6950201036065516376
+    second: Pinku body_20
+  - first:
+      213: -4576201163397911219
+    second: Pinku body_21
+  - first:
+      213: 5193360236208643367
+    second: Pinku body_22
+  - first:
+      213: -4593478313054472196
+    second: Pinku body_23
+  - first:
+      213: 2776082096480034099
+    second: Pinku body_24
+  - first:
+      213: 7981096734120801803
+    second: Pinku body_25
+  - first:
+      213: 3712318759675122708
+    second: Pinku body_26
+  - first:
+      213: 3426241666323327195
+    second: Pinku body_27
+  - first:
+      213: -4668738856065758873
+    second: Pinku body_28
+  - first:
+      213: 1658175115272026251
+    second: Pinku body_29
+  - first:
+      213: 688490546337614258
+    second: Pinku body_30
+  - first:
+      213: -6624750542394025426
+    second: Pinku body_31
+  - first:
+      213: 7324902520590486067
+    second: Pinku body_32
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: iOS
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Pinku body_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 1318
+        height: 1012
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ffd4c1f50455fa7c0800000000000000
+      internalID: -4057931004275569153
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pinku body_1
+      rect:
+        serializedVersion: 2
+        x: 997
+        y: 736
+        width: 6
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 89daaea1e7ecf4380800000000000000
+      internalID: -8984735690568061544
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pinku body_2
+      rect:
+        serializedVersion: 2
+        x: 1245
+        y: 615
+        width: 79
+        height: 123
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 42c26768b7555e0a0800000000000000
+      internalID: -6852977268949111772
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pinku body_3
+      rect:
+        serializedVersion: 2
+        x: 1343
+        y: 728
+        width: 72
+        height: 157
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bdcd243460cd0f3f0800000000000000
+      internalID: -868952808626135845
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pinku body_4
+      rect:
+        serializedVersion: 2
+        x: 1110
+        y: 701
+        width: 15
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f084de23aac6c2bf0800000000000000
+      internalID: -347783592959719409
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pinku body_5
+      rect:
+        serializedVersion: 2
+        x: 1166
+        y: 702
+        width: 8
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1befeac464d9367b0800000000000000
+      internalID: -5232165416814575951
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pinku body_6
+      rect:
+        serializedVersion: 2
+        x: 1323
+        y: 688
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 62df26e72aa6ade20800000000000000
+      internalID: 3376128116805270822
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pinku body_7
+      rect:
+        serializedVersion: 2
+        x: 1172
+        y: 655
+        width: 8
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a4c05abf00ac6c740800000000000000
+      internalID: 5172043327652301898
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pinku body_8
+      rect:
+        serializedVersion: 2
+        x: 1215
+        y: 655
+        width: 7
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b21fe1512740c21e0800000000000000
+      internalID: -2221395628173364949
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pinku body_9
+      rect:
+        serializedVersion: 2
+        x: 1237
+        y: 651
+        width: 25
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 212db8c73d3449aa0800000000000000
+      internalID: -6155220215101926894
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pinku body_10
+      rect:
+        serializedVersion: 2
+        x: 1263
+        y: 659
+        width: 7
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2053dbd1552f607a0800000000000000
+      internalID: -6411170572130241278
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pinku body_11
+      rect:
+        serializedVersion: 2
+        x: 1323
+        y: 665
+        width: 15
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7506672969fbb8380800000000000000
+      internalID: -8967863579554979753
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pinku body_12
+      rect:
+        serializedVersion: 2
+        x: 1333
+        y: 637
+        width: 97
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c2a029e2a104363e0800000000000000
+      internalID: -2061733723210905044
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pinku body_13
+      rect:
+        serializedVersion: 2
+        x: 1180
+        y: 647
+        width: 6
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0f6e4aa3ac66ccf80800000000000000
+      internalID: -8084974212283570448
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pinku body_14
+      rect:
+        serializedVersion: 2
+        x: 1197
+        y: 647
+        width: 15
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 88a22c7c35a2d8080800000000000000
+      internalID: -9183637525816530296
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pinku body_15
+      rect:
+        serializedVersion: 2
+        x: 1223
+        y: 625
+        width: 15
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5dbf87e616b0a52e0800000000000000
+      internalID: -2136382560140723243
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pinku body_16
+      rect:
+        serializedVersion: 2
+        x: 1307
+        y: 631
+        width: 11
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 62ee4f2d0b83ea720800000000000000
+      internalID: 2859285145531510310
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pinku body_17
+      rect:
+        serializedVersion: 2
+        x: 1400
+        y: 648
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7f6a42bb58a7ef7c0800000000000000
+      internalID: -4035653501288405257
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pinku body_18
+      rect:
+        serializedVersion: 2
+        x: 1317
+        y: 617
+        width: 19
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 068e4efe73c3d8d80800000000000000
+      internalID: -8246869131699885984
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pinku body_19
+      rect:
+        serializedVersion: 2
+        x: 1367
+        y: 623
+        width: 10
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4224f9661b82a94b0800000000000000
+      internalID: -5432985258073046492
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pinku body_20
+      rect:
+        serializedVersion: 2
+        x: 1253
+        y: 390
+        width: 31
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8a453cf3bfceb8f90800000000000000
+      internalID: -6950201036065516376
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pinku body_21
+      rect:
+        serializedVersion: 2
+        x: 1263
+        y: 388
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d4d20f2a9411e70c0800000000000000
+      internalID: -4576201163397911219
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pinku body_22
+      rect:
+        serializedVersion: 2
+        x: 1143
+        y: 360
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 72ddad58e95821840800000000000000
+      internalID: 5193360236208643367
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pinku body_23
+      rect:
+        serializedVersion: 2
+        x: 1148
+        y: 358
+        width: 24
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cf77de2cfcfa040c0800000000000000
+      internalID: -4593478313054472196
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pinku body_24
+      rect:
+        serializedVersion: 2
+        x: 1382
+        y: 356
+        width: 13
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 33d930c55ff968620800000000000000
+      internalID: 2776082096480034099
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pinku body_25
+      rect:
+        serializedVersion: 2
+        x: 1078
+        y: 315
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b06fc4ba13d82ce60800000000000000
+      internalID: 7981096734120801803
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pinku body_26
+      rect:
+        serializedVersion: 2
+        x: 1005
+        y: 226
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 41454734e3ec48330800000000000000
+      internalID: 3712318759675122708
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pinku body_27
+      rect:
+        serializedVersion: 2
+        x: 1005
+        y: 196
+        width: 8
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bd828db74a47c8f20800000000000000
+      internalID: 3426241666323327195
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pinku body_28
+      rect:
+        serializedVersion: 2
+        x: 94
+        y: 177
+        width: 6
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 76903271fbe453fb0800000000000000
+      internalID: -4668738856065758873
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pinku body_29
+      rect:
+        serializedVersion: 2
+        x: 1011
+        y: 161
+        width: 18
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b887e216b75030710800000000000000
+      internalID: 1658175115272026251
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pinku body_30
+      rect:
+        serializedVersion: 2
+        x: 517
+        y: 17
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2b90bad01820e8900800000000000000
+      internalID: 688490546337614258
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pinku body_31
+      rect:
+        serializedVersion: 2
+        x: 553
+        y: 21
+        width: 9
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e2a170b2b782014a0800000000000000
+      internalID: -6624750542394025426
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pinku body_32
+      rect:
+        serializedVersion: 2
+        x: 563
+        y: 15
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 33ac822980847a560800000000000000
+      internalID: 7324902520590486067
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Pinku body_0: -4057931004275569153
+      Pinku body_1: -8984735690568061544
+      Pinku body_10: -6411170572130241278
+      Pinku body_11: -8967863579554979753
+      Pinku body_12: -2061733723210905044
+      Pinku body_13: -8084974212283570448
+      Pinku body_14: -9183637525816530296
+      Pinku body_15: -2136382560140723243
+      Pinku body_16: 2859285145531510310
+      Pinku body_17: -4035653501288405257
+      Pinku body_18: -8246869131699885984
+      Pinku body_19: -5432985258073046492
+      Pinku body_2: -6852977268949111772
+      Pinku body_20: -6950201036065516376
+      Pinku body_21: -4576201163397911219
+      Pinku body_22: 5193360236208643367
+      Pinku body_23: -4593478313054472196
+      Pinku body_24: 2776082096480034099
+      Pinku body_25: 7981096734120801803
+      Pinku body_26: 3712318759675122708
+      Pinku body_27: 3426241666323327195
+      Pinku body_28: -4668738856065758873
+      Pinku body_29: 1658175115272026251
+      Pinku body_3: -868952808626135845
+      Pinku body_30: 688490546337614258
+      Pinku body_31: -6624750542394025426
+      Pinku body_32: 7324902520590486067
+      Pinku body_4: -347783592959719409
+      Pinku body_5: -5232165416814575951
+      Pinku body_6: 3376128116805270822
+      Pinku body_7: 5172043327652301898
+      Pinku body_8: -2221395628173364949
+      Pinku body_9: -6155220215101926894
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

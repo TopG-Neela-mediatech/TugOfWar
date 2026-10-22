@@ -236,14 +236,9 @@ namespace tmkoc.tugofwar.EditorTools
             var applier = battle.GetComponent<TugAssetsApplier>();
             if (applier == null) applier = battle.gameObject.AddComponent<TugAssetsApplier>();
             Set(applier, "gameManager", gm);
-            Set(applier, "ropeView", ropeView);
             Set(applier, "player", playerView);
             Set(applier, "pet", petView);
             Set(applier, "tutorial", tutorial);
-            Set(applier, "backgroundImage", bg);
-            Set(applier, "groundImage", ground);
-            Set(applier, "playerWinLineImage", playerLine);
-            Set(applier, "petWinLineImage", petLine);
 
             var scene = EditorSceneManager.GetActiveScene();
             EditorSceneManager.MarkSceneDirty(scene);
