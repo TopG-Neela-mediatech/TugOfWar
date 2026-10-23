@@ -48,6 +48,7 @@ namespace tmkoc.tugofwar
         [SerializeField] private RectTransform powerMeterRoot;
 
         private BannerKind? activeBanner;
+        private bool glowOn;
         private Tween bannerHideTween;
 
         private void Awake() => ResetUI();
@@ -155,7 +156,22 @@ namespace tmkoc.tugofwar
         {
             normalized = Mathf.Clamp01(normalized);
             if (powerFill != null) powerFill.fillAmount = normalized;
-            if (powerFullGlow != null) powerFullGlow.SetActive(normalized >= powerGlowThreshold);
+            bool glow = normalized >= powerGlowThreshold;
+            if (powerFullGlow != null && glow != glowOn)
+            {
+                glowOn = glow;
+                powerFullGlow.SetActive(glow);
+                var gi = powerFullGlow.GetComponent<Image>();
+                if (gi != null)
+                {
+                    DOTween.Kill(gi);
+                    if (glow)
+                    {
+                        var c = gi.color; c.a = 0.35f; gi.color = c;
+                        gi.DOFade(0.9f, 0.35f).SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo);   // soft pulsing glow
+                    }
+                }
+            }
         }
         #endregion
 

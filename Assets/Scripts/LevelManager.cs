@@ -38,6 +38,10 @@ namespace tmkoc.tugofwar
             GameManager.Instance.OnLevelWin += OnLevelWin;
             GameManager.Instance.OnLevelLose += OnLevelLose;
 
+#if PLAYSCHOOL_MAIN
+            // Startup is automatic when launched from the pet room; if it ever needs calling by hand:
+            // PetPanelMinGameEndScript.Initialize(petActivityData);
+#endif
             // Starts straight away on the level saved by HelperGameCategoryDataSaver (level 1 on a fresh start).
             StartLevel();
         }
@@ -60,12 +64,24 @@ namespace tmkoc.tugofwar
         private IEnumerator LoadWinPanelWithDelay(float delay)
         {
             yield return new WaitForSeconds(delay);
+#if PLAYSCHOOL_MAIN
+            // Inside Playschool Main the pet panel replaces our win panel: 100 points for every level won.
+            currentLevelIndex++;
+            HelperGameCategoryDataSaver.LevelCompleted(currentLevelIndex);
+            PetPanelMinGameEndScript.ShowGameEnd(RestartLevel, 100);
+#else
             GameManager.Instance.EndPanelScript.ShowWin();
+#endif
         }
         private IEnumerator LoadLosePanelWithDelay(float delay)
         {
             yield return new WaitForSeconds(delay);
+#if PLAYSCHOOL_MAIN
+            // 0 points for a lost level; the pet panel's retry button replays the same level.
+            PetPanelMinGameEndScript.ShowRetry(RetryLevel, 0);
+#else
             GameManager.Instance.EndPanelScript.ShowLose();
+#endif
         }
         private void ShowLevelScenery()
         {
@@ -86,16 +102,11 @@ namespace tmkoc.tugofwar
             HelperGameCategoryDataSaver.LevelCompleted(currentLevelIndex);
             if (currentLevelIndex < TotalLevels) return false;
 
-#if PLAYSCHOOL_MAIN
-                EffectParticleControll.Instance.SpawnGameEndPanel();
-                GameOverEndPanel.Instance.AddTheListnerRetryGame();
-                return true;
-#else
-            // Not running inside Playschool Main: restart the whole game from level 1.
+            // Not running inside Playschool Main (there the pet panel handles the end, see LoadWinPanelWithDelay):
+            // restart the whole game from level 1.
             currentLevelIndex = 0;
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
             return true;
-#endif
         }
         public void LoadNextLevel()
         {

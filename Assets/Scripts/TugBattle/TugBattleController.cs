@@ -67,6 +67,7 @@ namespace tmkoc.tugofwar
         private bool tappedOnce, meterFullPlayed, finalPush, dangerZone, safeZone;
         private float endTimer;
         private bool introActive;
+        private int currentLevel;
 
         private void Awake()
         {
@@ -86,6 +87,7 @@ namespace tmkoc.tugofwar
             cfg = config;
             isFinalLevel = isFinal;
             introActive = levelIndex == 0;   // mandatory tutorial: player pulls ahead before the Pet starts
+            currentLevel = levelIndex;
             if (winPresenter != null) winPresenter.ResetState();   // win images off, rope / characters / lines back on
 
             rope = target = 0f;
@@ -115,7 +117,7 @@ namespace tmkoc.tugofwar
             cdSpeed = fastCountdown ? 1.8f : 1f;
             State = MatchState.Countdown;
             ui.ShowCountdown("3");
-            Sound(s => { s.PlayMusic(MusicId.MatchStart); s.PlaySfx(SfxId.Countdown); });
+            Sound(s => { s.StopVoice(); s.PlayMusic(MusicId.MatchStart); s.PlaySfx(SfxId.Countdown); s.PlayVoice(VoiceId.LevelIntro, VoicePriority.High); });
         }
 
         // ------------------------------------------------------------------ Update
@@ -158,7 +160,7 @@ namespace tmkoc.tugofwar
                 Tut(t => t.OnPlayStart());
                 firstTapPromptUntil = gameTime + 3f;
                 ui.ShowBanner(BannerKind.TapFast);          // Phase 1: teach "Tap Fast!"
-                Sound(s => { s.PlayMusic(MusicId.Gameplay); s.PlayVoice(VoiceId.TapFast); });
+                Sound(s => { s.PlayMusic(MusicId.Gameplay); s.PlayVoice(introActive ? VoiceId.Tutorial : VoiceId.Go); });
             }
         }
 
@@ -233,13 +235,13 @@ namespace tmkoc.tugofwar
             {
                 safeZone = true; dangerZone = false;
                 ui.ShowBanner(BannerKind.KeepTapping);
-                Sound(s => s.PlayVoice(VoiceId.KeepTapping, false));
+                Sound(s => s.PlayVoice(VoiceId.KeepTapping, VoicePriority.Low));
             }
             else if (rope > nearWinRope && !dangerZone)
             {
                 dangerZone = true; safeZone = false;
                 ui.ShowBanner(BannerKind.TapFast);
-                Sound(s => s.PlayVoice(VoiceId.TapFast, false));
+                Sound(s => s.PlayVoice(VoiceId.Encourage));
             }
             else if (Mathf.Abs(rope) < nearWinRope - 12f && (safeZone || dangerZone))
             {
@@ -298,7 +300,7 @@ namespace tmkoc.tugofwar
                 {
                     voiceAt = gameTime;
                     var v = pop == PopKind.Good ? VoiceId.Good : pop == PopKind.Great ? VoiceId.Great : VoiceId.SuperPull;
-                    Sound(s => s.PlayVoice(v, false));
+                    Sound(s => s.PlayVoice(v, VoicePriority.Low));
                 }
             }
 
@@ -361,7 +363,7 @@ namespace tmkoc.tugofwar
                 case PetState.Tired:
                     ui.ShowBanner(BannerKind.PetTired, Mathf.Min(cfg.tiredDuration, 2f));
                     vfx?.PetTired();
-                    Sound(x => { x.PlaySfx(SfxId.PetTired); x.PlayVoice(VoiceId.NowTapFast); });
+                    Sound(x => { x.PlaySfx(SfxId.PetTired); x.PlayVoice(VoiceId.PetTired); });
                     break;
             }
         }
@@ -407,7 +409,7 @@ namespace tmkoc.tugofwar
                     s.PlaySfx(SfxId.VictoryChime);
                     s.PlaySfx(SfxId.Stars, 1f, 1f, 0.5f);
                     s.PlaySfx(SfxId.Confetti, 1f, 1f, 0.2f);
-                    s.PlayVoice(isFinalLevel ? VoiceId.AmazingFinal : VoiceId.YouWin, true, 0.35f);
+                    s.PlayVoice(isFinalLevel ? VoiceId.FinalWin : VoiceId.Win, VoicePriority.High, 0.35f, currentLevel);
                 });
                 GameManager.Instance.InvokeLevelWin();
             }
@@ -419,7 +421,7 @@ namespace tmkoc.tugofwar
                 {
                     s.PlayMusic(MusicId.Lose, 0.15f);
                     s.PlaySfx(SfxId.FunnyLose);
-                    s.PlayVoice(VoiceId.AlmostTapFaster, true, 0.5f);
+                    s.PlayVoice(VoiceId.Lose, VoicePriority.High, 0.5f, currentLevel);
                 });
                 GameManager.Instance.InvokeLevelLose();
             }

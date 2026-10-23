@@ -1,3 +1,4 @@
+using AssetKits.ParticleImage;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,6 +18,10 @@ namespace tmkoc.tugofwar
 
         [Tooltip("Hidden while a win image is showing, restored on reset: rope, player, pet, both win lines.")]
         [SerializeField] private GameObject[] hideOnWin;
+
+        [Header("Confetti (plays only when the PLAYER wins)")]
+        [SerializeField] private ParticleImage confettiShower;
+        [SerializeField] private ParticleImage confettiBurst;
 
         [Header("Winning animation")]
         [SerializeField] private float popTime = 0.45f;
@@ -90,6 +95,7 @@ namespace tmkoc.tugofwar
             if (hideOnWin != null)
                 foreach (var go in hideOnWin)
                     if (go != null) go.SetActive(true);
+            StopConfetti();
             IsShowing = false;
         }
 
@@ -119,12 +125,33 @@ namespace tmkoc.tugofwar
                 img.DOFade(rest.color.a, 0.2f).SetId(TweenId);
             }
             IsShowing = true;
+            if (playerWon) PlayConfetti();
 
             // pop in (overshoot, settle), then jump forever
             var pop = DOTween.Sequence().SetId(TweenId);
             pop.Append(rt.DOScale(rest.scale * 1.18f, popTime * 0.55f).SetEase(Ease.OutQuad));
             pop.Append(rt.DOScale(rest.scale, popTime * 0.45f).SetEase(Ease.OutBack));
             pop.AppendCallback(() => StartJumpLoop(rt, rest));
+        }
+
+        private void PlayConfetti()
+        {
+            Fire(confettiBurst);
+            Fire(confettiShower);
+        }
+
+        private void StopConfetti()
+        {
+            if (confettiBurst != null) confettiBurst.Stop(true);
+            if (confettiShower != null) confettiShower.Stop(true);
+        }
+
+        private static void Fire(ParticleImage p)
+        {
+            if (p == null) return;
+            p.gameObject.SetActive(true);
+            p.Stop(true);
+            p.Play();
         }
 
         // ------------------------------------------------------------------ Tweens

@@ -26,17 +26,28 @@ namespace tmkoc.tugofwar
 
     public enum VoiceId
     {
-        TapFast,          // "Tap Fast!"
-        KeepTapping,      // "Keep Tapping!"
-        StrongPull,       // "Strong Pull!"
-        NowTapFast,       // "Now! Tap Fast!"
-        Good,             // "Good!"
-        Great,            // "Great!"
-        SuperPull,        // "Super Pull!"
-        PowerPull,        // "Power Pull!"
-        YouWin,           // "You Win!"
-        AlmostTapFaster,  // "Almost! Tap Faster!"
-        AmazingFinal      // "Amazing! You won all the Tug Battles!"
+        LevelIntro,   // as the round starts
+        Tutorial,     // first round only: how to play
+        Go,           // right after GO
+        Good,         // tapping cheers (tap speed tiers)
+        Great,
+        SuperPull,
+        PowerPull,    // power meter full
+        KeepTapping,  // kid is close to winning
+        StrongPull,   // pet starts a strong pull
+        PetTired,     // pet is tired - attack now
+        Encourage,    // kid is losing ground (motivational)
+        Win,          // round won   (one line per level)
+        Lose,         // round lost  (one line per level)
+        FinalWin      // every round won
+    }
+
+    /// <summary>How a voice line behaves when another line is already playing. Lines NEVER overlap.</summary>
+    public enum VoicePriority
+    {
+        Low,      // chatty cheers: dropped if a line is playing
+        Normal,   // waits its turn (a newer Normal replaces an older waiting one)
+        High      // intro / win / lose: waits its turn and goes ahead of Normal
     }
 
     [Serializable]
@@ -59,42 +70,71 @@ namespace tmkoc.tugofwar
         public Vector2 pitchRange = Vector2.one;
     }
 
+    [Serializable]
+    public class LevelLine
+    {
+        [Tooltip("One or more RuntimeAudioLoader keys for this level (picked at random).")]
+        public string[] keys;
+        public LevelLine() { }
+        public LevelLine(params string[] k) { keys = k; }
+    }
+
     /// <summary>
     /// Voice-over keys for RuntimeAudioLoader (same idea as Animal Claw's AudioMapper).
-    /// Each cue can hold several keys - one is picked at random. Edit the strings to match the clip names in your audio bundle.
+    /// Each cue can hold several keys - one is picked at random, never the same twice in a row.
+    /// Win / Lose have one entry PER LEVEL (index 0 = first level). No line ever says a level number.
+    /// Edit the strings to match the clip names in your audio bundle. Full script: Docs/Tug Battle - Audio Script.md
     /// </summary>
     [Serializable]
     public class AudioMapper
     {
-        public string[] tapFast = { "tapfast" };                   // "Tap Fast!"
-        public string[] keepTapping = { "keeptapping" };           // "Keep Tapping!"
-        public string[] strongPull = { "strongpull" };             // "Strong Pull!"
-        public string[] nowTapFast = { "nowtapfast" };             // "Now! Tap Fast!"
-        public string[] good = { "good" };                         // "Good!"
-        public string[] great = { "great" };                       // "Great!"
-        public string[] superPull = { "superpull" };               // "Super Pull!"
-        public string[] powerPull = { "powerpull" };               // "Power Pull!"
-        public string[] youWin = { "youwin" };                     // "You Win!"
-        public string[] almostTapFaster = { "almosttapfaster" };   // "Almost! Tap Faster!"
-        public string[] amazingFinal = { "amazingfinal" };         // "Amazing! You won all the Tug Battles!"
+        public string[] levelIntro = { "tugintro1", "tugintro2", "tugintro3" };
+        public string[] tutorial = { "tugtutorial" };
+        public string[] go = { "tuggo1", "tuggo2" };
+        public string[] good = { "tuggood1", "tuggood2", "tuggood3" };
+        public string[] great = { "tuggreat1", "tuggreat2", "tuggreat3" };
+        public string[] superPull = { "tugsuper1", "tugsuper2" };
+        public string[] powerPull = { "tugpower1", "tugpower2" };
+        public string[] keepTapping = { "tugkeep1", "tugkeep2" };
+        public string[] strongPull = { "tugstrong1", "tugstrong2" };
+        public string[] petTired = { "tugtired1", "tugtired2" };
+        public string[] encourage = { "tugcheer1", "tugcheer2", "tugcheer3" };
+        public LevelLine[] win =
+        {
+            new LevelLine("tugwin1"), new LevelLine("tugwin2"), new LevelLine("tugwin3"), new LevelLine("tugwin4"), new LevelLine("tugwin5")
+        };
+        public LevelLine[] lose =
+        {
+            new LevelLine("tuglose1"), new LevelLine("tuglose2"), new LevelLine("tuglose3"), new LevelLine("tuglose4"), new LevelLine("tuglose5")
+        };
+        public string[] finalWin = { "tugfinal" };
 
-        public string[] Get(VoiceId id)
+        public string[] Get(VoiceId id, int level)
         {
             switch (id)
             {
-                case VoiceId.TapFast: return tapFast;
-                case VoiceId.KeepTapping: return keepTapping;
-                case VoiceId.StrongPull: return strongPull;
-                case VoiceId.NowTapFast: return nowTapFast;
+                case VoiceId.LevelIntro: return levelIntro;
+                case VoiceId.Tutorial: return tutorial;
+                case VoiceId.Go: return go;
                 case VoiceId.Good: return good;
                 case VoiceId.Great: return great;
                 case VoiceId.SuperPull: return superPull;
                 case VoiceId.PowerPull: return powerPull;
-                case VoiceId.YouWin: return youWin;
-                case VoiceId.AlmostTapFaster: return almostTapFaster;
-                case VoiceId.AmazingFinal: return amazingFinal;
+                case VoiceId.KeepTapping: return keepTapping;
+                case VoiceId.StrongPull: return strongPull;
+                case VoiceId.PetTired: return petTired;
+                case VoiceId.Encourage: return encourage;
+                case VoiceId.FinalWin: return finalWin;
+                case VoiceId.Win: return ForLevel(win, level);
+                case VoiceId.Lose: return ForLevel(lose, level);
             }
             return null;
+        }
+
+        private static string[] ForLevel(LevelLine[] lines, int level)
+        {
+            if (lines == null || lines.Length == 0) return null;
+            return lines[Mathf.Clamp(level, 0, lines.Length - 1)].keys;
         }
     }
 
@@ -226,42 +266,80 @@ namespace tmkoc.tugofwar
         public void PlayTap(TapTier tier) => PlaySfx(SfxId.Tap, 1f + (int)tier * 0.18f);
         #endregion
 
-        #region Voice (RuntimeAudioLoader keys)
+        #region Voice (RuntimeAudioLoader keys) - lines never overlap
         public bool IsVoicePlaying => RuntimeAudioLoader.Instance != null && RuntimeAudioLoader.Instance._commonAudioSource.isPlaying;
 
-        /// <param name="interrupt">False = skip if another line is still playing (for chatty cues like Good/Great).</param>
-        /// <returns>True if a line was started (or scheduled).</returns>
-        public bool PlayVoice(VoiceId id, bool interrupt = true, float delay = 0f)
+        private struct VoiceRequest { public VoiceId id; public VoicePriority priority; public int level; }
+        private VoiceRequest pending;
+        private bool hasPending;
+        private float nextVoiceTime;
+        private const float VoiceGap = 0.25f;   // breathing room between two lines
+
+        private bool VoiceBusy => IsVoicePlaying || Time.time < nextVoiceTime;
+
+        /// <summary>
+        /// Plays a voice line without ever overlapping another one.
+        /// Low = dropped if something is playing; Normal / High = wait for their turn (High goes first).
+        /// </summary>
+        /// <param name="level">Level index, used by Win / Lose (one line per level).</param>
+        /// <returns>True if the line started or was queued.</returns>
+        public bool PlayVoice(VoiceId id, VoicePriority priority = VoicePriority.Normal, float delay = 0f, int level = -1)
         {
             if (muted || RuntimeAudioLoader.Instance == null) return false;
-            if (delay > 0f) { StartCoroutine(PlayVoiceDelayed(id, interrupt, delay)); return true; }
-            if (!interrupt && IsVoicePlaying) return false;
+            if (delay > 0f) { StartCoroutine(PlayVoiceDelayed(id, priority, delay, level)); return true; }
 
-            string key = PickKey(id);
+            if (VoiceBusy)
+            {
+                if (priority == VoicePriority.Low) return false;
+                if (!hasPending || priority >= pending.priority)
+                {
+                    pending = new VoiceRequest { id = id, priority = priority, level = level };
+                    hasPending = true;
+                }
+                return true;
+            }
+            return StartVoice(id, level);
+        }
+
+        private bool StartVoice(VoiceId id, int level)
+        {
+            string key = PickKey(id, level);
             if (string.IsNullOrEmpty(key)) return false;
 
             float length = RuntimeAudioLoader.Instance.PlayRuntimeAudio(key);
-            if (length < 0f) return false;
+            if (length < 0f) return false;   // clip not in the bundle: stay silent, keep going
+            nextVoiceTime = Time.time + length + VoiceGap;
             if (duckRoutine != null) StopCoroutine(duckRoutine);
             duckRoutine = StartCoroutine(DuckMusic(length));
             return true;
         }
 
-        private IEnumerator PlayVoiceDelayed(VoiceId id, bool interrupt, float delay)
+        private void Update()
         {
-            yield return new WaitForSeconds(delay);
-            PlayVoice(id, interrupt);
+            if (!hasPending || VoiceBusy || RuntimeAudioLoader.Instance == null) return;
+            var next = pending;
+            hasPending = false;
+            StartVoice(next.id, next.level);
         }
 
+        private IEnumerator PlayVoiceDelayed(VoiceId id, VoicePriority priority, float delay, int level)
+        {
+            yield return new WaitForSeconds(delay);
+            PlayVoice(id, priority, 0f, level);
+        }
+
+        /// <summary>Stops the current line and forgets any waiting one.</summary>
         public void StopVoice()
         {
+            hasPending = false;
+            nextVoiceTime = 0f;
             if (RuntimeAudioLoader.Instance != null) RuntimeAudioLoader.Instance.StopCommonAudioSource();
         }
 
         // Several keys for one cue = random variation, never the same one twice in a row.
-        private string PickKey(VoiceId id)
+        private string PickKey(VoiceId id, int level)
         {
-            string[] keys = voiceKeys.Get(id);
+            string[] keys = voiceKeys.Get(id, level);
             if (keys == null || keys.Length == 0) return null;
             int index = UnityEngine.Random.Range(0, keys.Length);
             if (keys.Length > 1 && lastVoiceIndex.TryGetValue(id, out int last) && last == index)
