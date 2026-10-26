@@ -20,6 +20,8 @@ namespace tmkoc.tugofwar
         [SerializeField] private TugBattleVfx vfx;
         [Tooltip("Shows the winner image + hides rope, characters and lines at the end of a round. Optional: without it the old celebrate / slump on the characters is used.")]
         [SerializeField] private WinPresenter winPresenter;
+        /// <summary>Hides the winner celebration; the end panel calls this just before it appears.</summary>
+        public void HideCelebration() { if (winPresenter != null) winPresenter.HideCelebration(); }
 
         [Header("Tap power")]
         [Tooltip("Rope % pulled by one tap at Normal speed.")]
@@ -117,7 +119,7 @@ namespace tmkoc.tugofwar
             cdSpeed = fastCountdown ? 1.8f : 1f;
             State = MatchState.Countdown;
             ui.ShowCountdown("3");
-            Sound(s => { s.StopVoice(); s.PlayMusic(MusicId.MatchStart); s.PlaySfx(SfxId.Countdown); s.PlayVoice(VoiceId.LevelIntro, VoicePriority.High); });
+            Sound(s => { s.StopVoice(); s.PlaySfx(SfxId.Countdown); s.PlayVoice(VoiceId.LevelIntro, VoicePriority.High); });
         }
 
         // ------------------------------------------------------------------ Update
@@ -160,7 +162,7 @@ namespace tmkoc.tugofwar
                 Tut(t => t.OnPlayStart());
                 firstTapPromptUntil = gameTime + 3f;
                 ui.ShowBanner(BannerKind.TapFast);          // Phase 1: teach "Tap Fast!"
-                Sound(s => { s.PlayMusic(MusicId.Gameplay); s.PlayVoice(introActive ? VoiceId.Tutorial : VoiceId.Go); });
+                Sound(s => s.PlayVoice(introActive ? VoiceId.Tutorial : VoiceId.Go));
             }
         }
 
@@ -207,7 +209,6 @@ namespace tmkoc.tugofwar
             if (petBot.State == PetState.Strong && gameTime >= tensionAt)
             {
                 tensionAt = gameTime + 0.5f;
-                Sound(s => s.PlaySfx(SfxId.RopeTension));
             }
 
             // Near-win alert + final push music (hysteresis so it doesn't flicker)
@@ -215,18 +216,15 @@ namespace tmkoc.tugofwar
             if (abs > finalPushRope && gameTime >= alertAt)
             {
                 alertAt = gameTime + 0.55f;
-                Sound(s => s.PlaySfx(SfxId.NearWinAlert));
             }
             if (!finalPush && abs > finalPushRope)
             {
                 finalPush = true;
-                Sound(s => s.PlayMusic(MusicId.FinalPush));
                 vfx?.NearWinGlow(true, rope < 0f);
             }
             else if (finalPush && abs < finalPushRope - 18f)
             {
                 finalPush = false;
-                Sound(s => s.PlayMusic(MusicId.Gameplay));
                 vfx?.NearWinGlow(false);
             }
 
@@ -284,11 +282,9 @@ namespace tmkoc.tugofwar
             if (tier >= TapTier.Fast && gameTime - effortAt > 0.45f)
             {
                 effortAt = gameTime;
-                Sound(s => s.PlaySfx(SfxId.PlayerEffort));
                 ropeView.FlagShake(0.6f);
             }
 
-            if (tier > lastTier && tier >= TapTier.Fast) Sound(s => s.PlaySfx(SfxId.Combo));
             lastTier = tier;
 
             if (tier >= TapTier.Normal && gameTime - popAt > 0.42f)
@@ -324,11 +320,8 @@ namespace tmkoc.tugofwar
             if (power >= 75f && !meterFullPlayed)
             {
                 meterFullPlayed = true;
-                Sound(s => s.PlaySfx(SfxId.MeterFull));
             }
             else if (power < 50f) meterFullPlayed = false;
-            else if (!meterFullPlayed && Mathf.FloorToInt(power) % 12 == 0)
-                Sound(s => s.PlaySfx(SfxId.MeterFill, 1f + power / 200f, 0.6f));
         }
 
         private void PowerPull()
@@ -355,15 +348,12 @@ namespace tmkoc.tugofwar
                 case PetState.Warn:
                     ui.ShowBanner(BannerKind.StrongPull, cfg.warnTime + cfg.strongDuration);
                     vfx?.StrongPullWarning();
-                    Sound(x => { x.PlaySfx(SfxId.StrongAlert); x.PlayVoice(VoiceId.StrongPull); });
-                    break;
-                case PetState.Strong:
-                    Sound(x => x.PlaySfx(SfxId.PetEffort));
+                    Sound(x => x.PlayVoice(VoiceId.StrongPull));
                     break;
                 case PetState.Tired:
                     ui.ShowBanner(BannerKind.PetTired, Mathf.Min(cfg.tiredDuration, 2f));
                     vfx?.PetTired();
-                    Sound(x => { x.PlaySfx(SfxId.PetTired); x.PlayVoice(VoiceId.PetTired); });
+                    Sound(x => x.PlayVoice(VoiceId.PetTired));
                     break;
             }
         }
@@ -386,13 +376,11 @@ namespace tmkoc.tugofwar
                 pet.SlideForward();
                 vfx?.FinalPull();
                 ropeView.FlagShake(1.5f);
-                Sound(s => { s.PlaySfx(SfxId.FinalPull); s.PlaySfx(SfxId.FlagMove, 1f, 1f, 0.1f); });
             }
             else
             {
                 player.SetPose(Pose.LosingGround);
                 pet.SetPose(Pose.WinningGround);
-                Sound(s => s.PlaySfx(SfxId.FlagMove));
             }
         }
 
@@ -405,10 +393,7 @@ namespace tmkoc.tugofwar
                 else { player.SetPose(Pose.Celebrate); player.Celebrate(); pet.SetPose(Pose.Lose); }
                 Sound(s =>
                 {
-                    s.PlayMusic(isFinalLevel ? MusicId.FinalCelebration : MusicId.Victory, 0.15f);
                     s.PlaySfx(SfxId.VictoryChime);
-                    s.PlaySfx(SfxId.Stars, 1f, 1f, 0.5f);
-                    s.PlaySfx(SfxId.Confetti, 1f, 1f, 0.2f);
                     s.PlayVoice(isFinalLevel ? VoiceId.FinalWin : VoiceId.Win, VoicePriority.High, 0.35f, currentLevel);
                 });
                 GameManager.Instance.InvokeLevelWin();
@@ -419,7 +404,6 @@ namespace tmkoc.tugofwar
                 else { player.SetPose(Pose.Lose); player.Slump(); pet.SetPose(Pose.Celebrate); pet.Celebrate(); }
                 Sound(s =>
                 {
-                    s.PlayMusic(MusicId.Lose, 0.15f);
                     s.PlaySfx(SfxId.FunnyLose);
                     s.PlayVoice(VoiceId.Lose, VoicePriority.High, 0.5f, currentLevel);
                 });

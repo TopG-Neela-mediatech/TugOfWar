@@ -1,27 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using DG.Tweening;
 using UnityEngine;
 
 namespace tmkoc.tugofwar
 {
-    public enum MusicId
-    {
-        None,
-        MatchStart,        // plays during 3-2-1-GO
-        Gameplay,          // Tug Battle Gameplay Music
-        FinalPush,         // when someone is close to winning
-        Victory,
-        Lose,              // Lose / Retry
-        FinalCelebration   // all levels complete
-    }
-
+    /// <summary>Only the effects the game really needs. Anything left empty falls back to a built-in placeholder tone.</summary>
     public enum SfxId
     {
-        Countdown, Go, Tap, RopeTension, PlayerEffort, PetEffort, FlagMove,
-        StrongAlert, PetTired, MeterFill, MeterFull, PowerWhoosh, Combo,
-        NearWinAlert, FinalPull, VictoryChime, Stars, Confetti, FunnyLose, ButtonClick
+        Countdown, Go, Tap, PowerWhoosh, VictoryChime, FunnyLose
     }
 
     public enum VoiceId
@@ -51,23 +38,11 @@ namespace tmkoc.tugofwar
     }
 
     [Serializable]
-    public class MusicEntry
-    {
-        public MusicId id;
-        public AudioClip clip;
-        [Range(0f, 1f)] public float volume = 0.6f;
-        public bool loop = true;
-    }
-
-    [Serializable]
     public class SfxEntry
     {
         public SfxId id;
-        [Tooltip("Optional. Several clips = random variation. Empty = built-in synthesised placeholder is used.")]
-        public AudioClip[] clips;
-        [Range(0f, 1f)] public float volume = 1f;
-        [Tooltip("Random pitch range (min, max).")]
-        public Vector2 pitchRange = Vector2.one;
+        [Tooltip("Optional. Empty = built-in synthesised placeholder is used.")]
+        public AudioClip clip;
     }
 
     [Serializable]
@@ -140,33 +115,27 @@ namespace tmkoc.tugofwar
 
 
     /// <summary>
-    /// Scene sound manager: music (crossfade), pooled SFX, and a single voice channel.
-    /// Fill the three lists in the Inspector (right-click the component > "Populate All Entries" creates the rows).
-    /// Missing SFX fall back to synthesised placeholders; missing music/voice are silently skipped.
+    /// Scene sound manager: one looping BGM, a few pooled SFX and a single voice channel.
+    /// Assign the BGM clip and the SFX clips in the Inspector (right-click > "Populate All Entries" creates the SFX rows).
+    /// Missing SFX fall back to synthesised placeholders; voice lines come from RuntimeAudioLoader keys.
     /// </summary>
     public class SoundManager : MonoBehaviour
     {
-        [Header("Library")]
-        [SerializeField] private MusicEntry[] music;
+        [Header("Background music (looped)")]
+        [SerializeField] private AudioClip bgm;
+        [Header("SFX")]
         [SerializeField] private SfxEntry[] sfx;
         [Header("Voice-over keys (RuntimeAudioLoader) - edit to match your audio bundle")]
         [SerializeField] private AudioMapper voiceKeys = new AudioMapper();
 
-        [Header("Volumes")]
-        [Range(0f, 1f)] [SerializeField] private float masterVolume = 1f;
-        [Range(0f, 1f)] [SerializeField] private float sfxVolume = 0.9f;
-        [SerializeField] private int sfxVoices = 10;
-        [Tooltip("Music is lowered to this fraction while a voice line plays.")]
-        [Range(0.2f, 1f)] [SerializeField] private float duckTo = 0.55f;
+        private const float BgmVolume = 0.6f;
+        private const float DuckTo = 0.55f;     // BGM is lowered to this fraction while a voice line plays
+        private const int SfxVoices = 6;
 
-        private readonly Dictionary<MusicId, MusicEntry> musicMap = new Dictionary<MusicId, MusicEntry>();
         private readonly Dictionary<SfxId, SfxEntry> sfxMap = new Dictionary<SfxId, SfxEntry>();
         private readonly Dictionary<VoiceId, int> lastVoiceIndex = new Dictionary<VoiceId, int>();
 
-        private AudioSource[] musicSources;   // two sources for crossfading
-        private int activeMusic;
-        private MusicId currentMusic = MusicId.None;
-        private float currentMusicVolume;
+        private AudioSource musicSource;
         private AudioSource[] sfxSources;
         private int nextSfx;
         private bool muted;
@@ -174,18 +143,18 @@ namespace tmkoc.tugofwar
 
         private void Awake()
         {
-            foreach (var m in music ?? Array.Empty<MusicEntry>()) if (m != null) musicMap[m.id] = m;
-            foreach (var s in sfx ?? Array.Empty<SfxEntry>()) if (s != null) sfxMap[s.id] = s;
+            foreach (var e in sfx ?? Array.Empty<SfxEntry>()) if (e != null) sfxMap[e.id] = e;
 
-            musicSources = new[] { CreateSource("Music A", true), CreateSource("Music B", true) };
-            sfxSources = new AudioSource[Mathf.Max(1, sfxVoices)];
+            musicSource = CreateSource("Music", true);
+            sfxSources = new AudioSource[SfxVoices];
             for (int i = 0; i < sfxSources.Length; i++) sfxSources[i] = CreateSource("Sfx " + i, false);
         }
+
+        private void Start() => PlayBgm();
 
         private void OnDestroy()
         {
             AudioListener.pause = false;
-            DOTween.Kill(this);
         }
 
         private AudioSource CreateSource(string sourceName, bool loop)
@@ -200,58 +169,33 @@ namespace tmkoc.tugofwar
         }
 
         #region Music
-        public void PlayMusic(MusicId id, float fade = 0.4f)
+        /// <summary>Starts the looping BGM (called once on Start; does nothing if no clip is assigned).</summary>
+        public void PlayBgm()
         {
-            if (id == currentMusic) return;
-            currentMusic = id;
-
-            var old = musicSources[activeMusic];
-            DOTween.Kill(old);
-            FadeTo(old, 0f, fade, stopAtEnd: true);
-
-            if (id == MusicId.None || !musicMap.TryGetValue(id, out var entry) || entry.clip == null) return;
-
-            activeMusic = 1 - activeMusic;
-            var src = musicSources[activeMusic];
-            DOTween.Kill(src);
-            src.clip = entry.clip;
-            src.loop = entry.loop;
-            src.volume = 0f;
-            src.Play();
-            currentMusicVolume = entry.volume * masterVolume * (muted ? 0f : 1f);
-            FadeTo(src, currentMusicVolume, fade, false);
-        }
-
-        public void StopMusic(float fade = 0.4f) => PlayMusic(MusicId.None, fade);
-
-        private void FadeTo(AudioSource src, float volume, float time, bool stopAtEnd)
-        {
-            DOTween.To(() => src.volume, v => src.volume = v, volume, Mathf.Max(0.01f, time))
-                .SetTarget(src).SetId(this)
-                .OnComplete(() => { if (stopAtEnd) src.Stop(); });
+            if (bgm == null || musicSource.isPlaying) return;
+            musicSource.clip = bgm;
+            musicSource.loop = true;
+            musicSource.volume = BgmVolume;
+            musicSource.mute = muted;
+            musicSource.Play();
         }
         #endregion
 
         #region SFX
-        /// <param name="pitch">Multiplier on top of the entry's random pitch (e.g. tap tier).</param>
+        /// <param name="pitch">Multiplier (e.g. tap tier).</param>
         public void PlaySfx(SfxId id, float pitch = 1f, float volume = 1f, float delay = 0f)
         {
             if (muted) return;
             if (delay > 0f) { StartCoroutine(PlaySfxDelayed(id, pitch, volume, delay)); return; }
 
             sfxMap.TryGetValue(id, out var entry);
-            AudioClip clip = null;
-            if (entry != null && entry.clips != null && entry.clips.Length > 0)
-                clip = entry.clips[UnityEngine.Random.Range(0, entry.clips.Length)];
+            AudioClip clip = entry != null ? entry.clip : null;
             if (clip == null) clip = ProceduralAudio.Get(id);
-
-            float entryVol = entry != null ? entry.volume : 1f;
-            float randomPitch = entry != null ? UnityEngine.Random.Range(entry.pitchRange.x, entry.pitchRange.y) : 1f;
 
             var src = sfxSources[nextSfx];
             nextSfx = (nextSfx + 1) % sfxSources.Length;
-            src.pitch = randomPitch * pitch;
-            src.volume = entryVol * volume * sfxVolume * masterVolume;
+            src.pitch = pitch;
+            src.volume = volume;
             src.clip = clip;
             src.Play();
         }
@@ -350,10 +294,9 @@ namespace tmkoc.tugofwar
 
         private IEnumerator DuckMusic(float seconds)
         {
-            var src = musicSources[activeMusic];
-            if (src.isPlaying) src.volume = currentMusicVolume * duckTo;
+            if (musicSource.isPlaying) musicSource.volume = BgmVolume * DuckTo;
             yield return new WaitForSeconds(seconds);
-            if (src != null && src.isPlaying) src.volume = currentMusicVolume;
+            if (musicSource != null && musicSource.isPlaying) musicSource.volume = BgmVolume;
         }
         #endregion
 
@@ -362,7 +305,7 @@ namespace tmkoc.tugofwar
         {
             muted = value;
             if (value) { StopVoice(); foreach (var s in sfxSources) s.Stop(); }
-            foreach (var m in musicSources) m.mute = value;
+            musicSource.mute = value;
             if (RuntimeAudioLoader.Instance != null) RuntimeAudioLoader.Instance._commonAudioSource.mute = value;
         }
 
@@ -382,21 +325,11 @@ namespace tmkoc.tugofwar
         [ContextMenu("Populate All Entries")]
         private void PopulateAll()
         {
-            music = Fill(music, (MusicId[])Enum.GetValues(typeof(MusicId)), (e, id) => e.id == id, id => new MusicEntry { id = id }, id => id != MusicId.None);
-            sfx = Fill(sfx, (SfxId[])Enum.GetValues(typeof(SfxId)), (e, id) => e.id == id, id => new SfxEntry { id = id }, id => true);
+            var list = new List<SfxEntry>(sfx ?? new SfxEntry[0]);
+            foreach (SfxId id in Enum.GetValues(typeof(SfxId)))
+                if (!list.Exists(e => e.id == id)) list.Add(new SfxEntry { id = id });
+            sfx = list.ToArray();
             UnityEditor.EditorUtility.SetDirty(this);
-        }
-
-        private static T[] Fill<T, TId>(T[] existing, TId[] ids, Func<T, TId, bool> matches, Func<TId, T> create, Func<TId, bool> include)
-        {
-            var list = new List<T>(existing ?? new T[0]);
-            foreach (var id in ids)
-            {
-                if (!include(id)) continue;
-                if (list.Exists(e => matches(e, id))) continue;
-                list.Add(create(id));
-            }
-            return list.ToArray();
         }
 #endif
     }

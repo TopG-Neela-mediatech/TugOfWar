@@ -16,6 +16,15 @@ namespace tmkoc.tugofwar
         [SerializeField] private RectTransform playerWin;
         [SerializeField] private RectTransform petWin;
 
+        [Header("Win animation prefabs (rigged, optional - the win image is used when empty)")]
+        [Tooltip("Pinku prefab. It is spawned inside the PlayerWin rect, fitted to that rect, and plays Celebration State.")]
+        [SerializeField] private GameObject playerWinPrefab;
+        [SerializeField] private GameObject petWinPrefab;
+        [SerializeField] private string playerCelebrationState = "PinkuFrontCelebration";
+        [SerializeField] private string petCelebrationState = "DogHappy";
+        [Tooltip("1 = the animation fills the win rect (keeps its proportions). Lower it if the jump clips.")]
+        [Range(0.3f, 1.2f)] [SerializeField] private float fitScale = 0.85f;
+
         [Tooltip("Hidden while a win image is showing, restored on reset: rope, player, pet, both win lines.")]
         [SerializeField] private GameObject[] hideOnWin;
 
@@ -40,6 +49,7 @@ namespace tmkoc.tugofwar
         }
 
         private Rest playerRest, petRest;
+        private GameObject playerAnim, petAnim;
         private bool cached;
         private string TweenId => "winpresenter" + GetInstanceID();
 
@@ -79,7 +89,7 @@ namespace tmkoc.tugofwar
             rt.localScale = r.scale;
             rt.localRotation = r.rot;
             var img = rt.GetComponent<Image>();
-            if (img != null) img.color = r.color;
+            if (img != null) { img.color = r.color; img.enabled = true; }
             rt.gameObject.SetActive(false);
         }
 
@@ -92,11 +102,23 @@ namespace tmkoc.tugofwar
             DOTween.Kill(TweenId);
             Restore(playerWin, playerRest);
             Restore(petWin, petRest);
+            if (playerAnim != null) playerAnim.SetActive(false);
+            if (petAnim != null) petAnim.SetActive(false);
             if (hideOnWin != null)
                 foreach (var go in hideOnWin)
                     if (go != null) go.SetActive(true);
             StopConfetti();
             IsShowing = false;
+        }
+
+        /// <summary>Removes the celebrating character (called right before the end panel pops up). Confetti keeps going.</summary>
+        public void HideCelebration()
+        {
+            DOTween.Kill(TweenId);
+            Restore(playerWin, playerRest);
+            Restore(petWin, petRest);
+            if (playerAnim != null) playerAnim.SetActive(false);
+            if (petAnim != null) petAnim.SetActive(false);
         }
 
         public void Show(bool playerWon)
@@ -117,8 +139,21 @@ namespace tmkoc.tugofwar
             rt.gameObject.SetActive(true);
             rt.anchoredPosition = rest.pos;
             rt.localRotation = rest.rot;
-            rt.localScale = rest.scale * 0.2f;
+            rt.localScale = rest.scale;
             var img = rt.GetComponent<Image>();
+
+            // rigged animation prefab replaces the still image
+            bool animated = ShowAnimation(playerWon, rt, img);
+            rt.localScale = rest.scale * 0.2f;
+            if (animated)
+            {
+                IsShowing = true;
+                if (playerWon) PlayConfetti();
+                DOTween.Sequence().SetId(TweenId)
+                    .Append(rt.DOScale(rest.scale * 1.12f, popTime * 0.55f).SetEase(Ease.OutQuad))
+                    .Append(rt.DOScale(rest.scale, popTime * 0.45f).SetEase(Ease.OutBack));
+                return;
+            }
             if (img != null)
             {
                 var c = rest.color; c.a = 0f; img.color = c;
@@ -132,6 +167,74 @@ namespace tmkoc.tugofwar
             pop.Append(rt.DOScale(rest.scale * 1.18f, popTime * 0.55f).SetEase(Ease.OutQuad));
             pop.Append(rt.DOScale(rest.scale, popTime * 0.45f).SetEase(Ease.OutBack));
             pop.AppendCallback(() => StartJumpLoop(rt, rest));
+        }
+
+        // ------------------------------------------------------------------ Rigged animation prefab on the canvas
+
+        private bool ShowAnimation(bool playerWon, RectTransform rt, Image img)
+        {
+            var prefab = playerWon ? playerWinPrefab : petWinPrefab;
+            if (prefab == null) return false;
+
+            ref GameObject inst = ref (playerWon ? ref playerAnim : ref petAnim);
+            if (inst == null)
+            {
+                inst = Instantiate(prefab, rt);
+                inst.name = prefab.name + " (Win)";
+                var t = inst.transform;
+                t.localPosition = Vector3.zero;
+                t.localRotation = Quaternion.identity;
+                t.localScale = Vector3.one;
+                Fit(inst, rt);
+            }
+            inst.SetActive(true);
+            if (img != null) img.enabled = false;   // the rig is shown instead of the still image
+
+            var anim = inst.GetComponentInChildren<Animator>();
+            if (anim != null)
+            {
+                anim.Rebind();
+                anim.Play(playerWon ? playerCelebrationState : petCelebrationState, 0, 0f);
+                anim.Update(0f);
+            }
+            return true;
+        }
+
+        // Sprite renderers sit above the canvas content, then the rig is scaled to fit the win rect and
+        // stands on its bottom edge, centred.
+        private void Fit(GameObject inst, RectTransform rect)
+        {
+            var renderers = inst.GetComponentsInChildren<SpriteRenderer>(true);
+            if (renderers.Length == 0) return;
+
+            var canvas = rect.GetComponentInParent<Canvas>();
+            int order = canvas != null ? canvas.rootCanvas.sortingOrder : 0;
+            string layer = canvas != null ? SortingLayer.IDToName(canvas.rootCanvas.sortingLayerID) : "Default";
+            foreach (var r in renderers)
+            {
+                r.sortingLayerName = layer;
+                r.sortingOrder = order + 5 + r.sortingOrder;
+            }
+
+            Bounds b = renderers[0].bounds;
+            foreach (var r in renderers) b.Encapsulate(r.bounds);
+            if (b.size.x < 0.0001f || b.size.y < 0.0001f) return;
+
+            var corners = new Vector3[4];
+            rect.GetWorldCorners(corners);
+            float rectW = Vector3.Distance(corners[0], corners[3]);
+            float rectH = Vector3.Distance(corners[0], corners[1]);
+
+            float k = Mathf.Min(rectW / b.size.x, rectH / b.size.y) * fitScale;
+            inst.transform.localScale = Vector3.one * k;
+
+            // re-measure, then put the feet on the bottom edge and centre horizontally
+            b = renderers[0].bounds;
+            foreach (var r in renderers) b.Encapsulate(r.bounds);
+            Vector3 bottomCentre = (corners[0] + corners[3]) * 0.5f;
+            Vector3 d = bottomCentre - new Vector3(b.center.x, b.min.y, b.center.z);
+            d.z = 0f;
+            inst.transform.position += d;
         }
 
         private void PlayConfetti()

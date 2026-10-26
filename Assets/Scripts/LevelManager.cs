@@ -12,7 +12,7 @@ namespace tmkoc.tugofwar
         [SerializeField] private GameObject[] levels;
         [Tooltip("One entry per level. Leave empty to use the 5 default levels.")]
         [SerializeField] private TugLevelConfig[] levelConfigs;
-        [SerializeField] private float resultPanelDelay = 1f;
+        [SerializeField] private float resultPanelDelay = 3f;
 
         public int currentLevelIndex { get; private set; }
         public bool HasLevelStarted { get; private set; }
@@ -59,11 +59,12 @@ namespace tmkoc.tugofwar
         private void OnLevelLose()
         {
             HelperGameCategoryDataSaver.AddAttempt();
-            StartCoroutine(LoadLosePanelWithDelay(resultPanelDelay * 0.6f));
+            StartCoroutine(LoadLosePanelWithDelay(resultPanelDelay));
         }
         private IEnumerator LoadWinPanelWithDelay(float delay)
         {
             yield return new WaitForSeconds(delay);
+            GameManager.Instance.BattleController.HideCelebration();
 #if PLAYSCHOOL_MAIN
             // Inside Playschool Main the pet panel replaces our win panel: 100 points for every level won.
             currentLevelIndex++;
@@ -76,6 +77,7 @@ namespace tmkoc.tugofwar
         private IEnumerator LoadLosePanelWithDelay(float delay)
         {
             yield return new WaitForSeconds(delay);
+            GameManager.Instance.BattleController.HideCelebration();
 #if PLAYSCHOOL_MAIN
             // 0 points for a lost level; the pet panel's retry button replays the same level.
             PetPanelMinGameEndScript.ShowRetry(RetryLevel, 0);
