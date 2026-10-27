@@ -6,11 +6,11 @@
         },
         {
             "k": "GameName",
-            "v": ""
+            "v": "tugofwar"
         },
         {
             "k": "AssetBundleFolder",
-            "v": ""
+            "v": "D:/UnityProjects/TugOfWar/AssetBundles"
         },
         {
             "k": "ToolsRoot",
@@ -319,6 +319,10 @@
         {
             "k": "ToolDest_PlayschoolFonts",
             "v": "D:/UnityProjects/TugOfWar/Assets/APIs"
+        },
+        {
+            "k": "ScriptList",
+            "v": "Assets/Scripts"
         }
     ]
 }

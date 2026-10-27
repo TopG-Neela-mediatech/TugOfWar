@@ -1,0 +1,117 @@
+ManifestFileVersion: 0
+UnityVersion: 6000.0.77f1
+CRC: 50385990
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 684d110000c2071eefe088b09a892edf
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 05e39bc95394825dd5c816e74bd41d9a
+  IncrementalBuildHash:
+    serializedVersion: 2
+    Hash: 23e193db1202d348e3e5e0bd5868bfbc
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 20
+  Script: {instanceID: 0}
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+- Class: 74
+  Script: {instanceID: 0}
+- Class: 81
+  Script: {instanceID: 0}
+- Class: 83
+  Script: {instanceID: 0}
+- Class: 91
+  Script: {instanceID: 0}
+- Class: 95
+  Script: {instanceID: 0}
+- Class: 104
+  Script: {instanceID: 0}
+- Class: 114
+  Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: f1ec92f315b94ff4aaa1400bff83faa5, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: d4b575f774bb789409a2bf053ab77725, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 76c392e42b5098c458856cdf6ecaaaa1, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 4f231c4fb786f3946a6b90b886c48677, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 65fd991401f8e8345956a97cc29b91cb, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 4d9884be1687f1749bb129217b3b473a, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 0768c9c9d7ff5db42a00851400339db0, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 2cdcbea113a9c4099991e8fe2c9706b5, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 36bd4a4832cef044e836b2085a20889c, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 66b29fdc8e1cf114ab642fd25e836701, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: a0ce80c06832d4a49a2a30ece9fb2df6, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 57c008f954fe54a8bb972de1018a2cb8, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 91cd7e4398fdf58489e15456270b4aae, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 5d0801b9e9de3ea41a6b192323aeb49c, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 7190f7abebf2d17438b02aa5e783020a, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 488da5873a88e134984b6acad1c14328, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 073797afb82c5a1438f328866b10b3f0, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 6203f1735a130dd46966ac86c0fe3fc9, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: e40adf780c5fa4841a83304788db6aca, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 71c1514a6bd24e1e882cebbe1904ce04, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: d9b512d0b9af33b4783fa9e96810f1bc, type: 3}
+- Class: 115
+  Script: {instanceID: 0}
+- Class: 128
+  Script: {instanceID: 0}
+- Class: 157
+  Script: {instanceID: 0}
+- Class: 196
+  Script: {instanceID: 0}
+- Class: 212
+  Script: {instanceID: 0}
+- Class: 213
+  Script: {instanceID: 0}
+- Class: 222
+  Script: {instanceID: 0}
+- Class: 223
+  Script: {instanceID: 0}
+- Class: 224
+  Script: {instanceID: 0}
+- Class: 225
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/Scenes/TugOfWar.unity
+Dependencies: []
