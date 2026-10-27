@@ -19,9 +19,18 @@ namespace tmkoc.tugofwar
         public bool IsFinalLevel => currentLevelIndex == TotalLevels - 1;
         private int TotalLevels => levelConfigs.Length;
         private bool isRetry;
+        private bool resultPending;
+        private const int WinStars = 5;
+#if PLAYSCHOOL_MAIN
+        private PetRoomStarRewards starRewards;
+#endif
 
         private void StartLevel()
         {
+            resultPending = false;
+#if PLAYSCHOOL_MAIN
+            starRewards = new PetRoomStarRewards();
+#endif
             HasLevelStarted = true;
             GameManager.Instance.InvokeLevelStart();
         }
@@ -54,10 +63,19 @@ namespace tmkoc.tugofwar
         }
         private void OnLevelWin()
         {
+            if (resultPending)
+                return;
+            resultPending = true;
+#if PLAYSCHOOL_MAIN
+            starRewards.AwardTotal(WinStars);
+#endif
             StartCoroutine(LoadWinPanelWithDelay(resultPanelDelay));
         }
         private void OnLevelLose()
         {
+            if (resultPending)
+                return;
+            resultPending = true;
             HelperGameCategoryDataSaver.AddAttempt();
             StartCoroutine(LoadLosePanelWithDelay(resultPanelDelay));
         }
@@ -66,13 +84,18 @@ namespace tmkoc.tugofwar
             yield return new WaitForSeconds(delay);
             GameManager.Instance.BattleController.HideCelebration();
 #if PLAYSCHOOL_MAIN
-            // Inside Playschool Main the pet panel replaces our win panel: 100 points for every level won.
-            currentLevelIndex++;
-            HelperGameCategoryDataSaver.LevelCompleted(currentLevelIndex);
-            PetPanelMinGameEndScript.ShowGameEnd(RestartLevel, 100);
-#else
-            GameManager.Instance.EndPanelScript.ShowWin();
+            // The result displays the same five stars already credited for this win.
+            if (PetPanelMinGameEndScript.IsConfigured)
+            {
+                currentLevelIndex++;
+                SaveCompletedLevel(currentLevelIndex);
+                if (PetPanelMinGameEndScript.ShowGameEnd(RestartLevel, WinStars))
+                    yield break;
+                // The local panel advances the level itself when it closes.
+                currentLevelIndex--;
+            }
 #endif
+            GameManager.Instance.EndPanelScript.ShowWin();
         }
         private IEnumerator LoadLosePanelWithDelay(float delay)
         {
@@ -80,10 +103,10 @@ namespace tmkoc.tugofwar
             GameManager.Instance.BattleController.HideCelebration();
 #if PLAYSCHOOL_MAIN
             // 0 points for a lost level; the pet panel's retry button replays the same level.
-            PetPanelMinGameEndScript.ShowRetry(RetryLevel, 0);
-#else
-            GameManager.Instance.EndPanelScript.ShowLose();
+            if (PetPanelMinGameEndScript.ShowRetry(RetryLevel, 0))
+                yield break;
 #endif
+            GameManager.Instance.EndPanelScript.ShowLose();
         }
         private void ShowLevelScenery()
         {
@@ -101,14 +124,26 @@ namespace tmkoc.tugofwar
         {
             currentLevelIndex++;
             // Saved even past the last level; GetStartLevel() wraps a saved index >= level count back to 0.
-            HelperGameCategoryDataSaver.LevelCompleted(currentLevelIndex);
+            SaveCompletedLevel(currentLevelIndex);
             if (currentLevelIndex < TotalLevels) return false;
 
-            // Not running inside Playschool Main (there the pet panel handles the end, see LoadWinPanelWithDelay):
-            // restart the whole game from level 1.
+            // The local result panel also wraps the final level back to level 1.
             currentLevelIndex = 0;
+#if PLAYSCHOOL_MAIN
+            return false;
+#else
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
             return true;
+#endif
+        }
+
+        private void SaveCompletedLevel(int completedLevels)
+        {
+#if PLAYSCHOOL_MAIN
+            HelperGameCategoryDataSaver.SaveCategoryJson(completedLevels);
+#else
+            HelperGameCategoryDataSaver.LevelCompleted(completedLevels);
+#endif
         }
         public void LoadNextLevel()
         {
