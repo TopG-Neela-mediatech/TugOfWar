@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6aa2f549b2e68f24e80aa4deb8ab0952, type: 3}
+  m_Name: ThreeInARowAssetsSO
+  m_EditorClassIdentifier: 
+  board: {fileID: 0}
+  emptySquare: {fileID: 0}
+  tapuFace: {fileID: -2134140110334163522, guid: 29600410dc427ef478c53ec901d0f117, type: 3}
+  petFace: {fileID: 1235752080043875, guid: aa939b4fad69fc947bd590827cbf5be4, type: 3}
+  tapuCharacter: {fileID: 0}
+  petCharacter: {fileID: 0}
+  winLine: {fileID: 0}
+  tutorialHand: {fileID: 5983672484659680106, guid: e487ab1ec3909814fbd0b2e0e8cafbb3, type: 3}
