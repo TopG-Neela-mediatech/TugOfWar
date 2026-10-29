@@ -22,6 +22,9 @@ namespace tmkoc.tugofwar
         [SerializeField] private GameObject petWinPrefab;
         [SerializeField] private string playerCelebrationState = "PinkuFrontCelebration";
         [SerializeField] private string petCelebrationState = "DogHappy";
+        [Tooltip("Playschool Main: used instead of the dog when the player's selected pet is the cat.")]
+        [SerializeField] private GameObject petWinCatPrefab;
+        [SerializeField] private string petCatCelebrationState = "CatHappy";
         [Tooltip("1 = the animation fills the win rect (keeps its proportions). Lower it if the jump clips.")]
         [Range(0.3f, 1.2f)] [SerializeField] private float fitScale = 0.85f;
 
@@ -174,6 +177,24 @@ namespace tmkoc.tugofwar
         private bool ShowAnimation(bool playerWon, RectTransform rt, Image img)
         {
             var prefab = playerWon ? playerWinPrefab : petWinPrefab;
+            string state = playerWon ? playerCelebrationState : petCelebrationState;
+#if PLAYSCHOOL_MAIN
+            if (!playerWon && petWinCatPrefab != null)
+            {
+                PetType pet = PlayroomSaveService.GetSelectedPet();
+
+                if (pet == PetType.Cat)
+                {
+                    // Handle the cat activity.
+                    prefab = petWinCatPrefab;
+                    state = petCatCelebrationState;
+                }
+                else
+                {
+                    // handle the dog
+                }
+            }
+#endif
             if (prefab == null) return false;
 
             ref GameObject inst = ref (playerWon ? ref playerAnim : ref petAnim);
@@ -194,7 +215,7 @@ namespace tmkoc.tugofwar
             if (anim != null)
             {
                 anim.Rebind();
-                anim.Play(playerWon ? playerCelebrationState : petCelebrationState, 0, 0f);
+                anim.Play(state, 0, 0f);
                 anim.Update(0f);
             }
             return true;

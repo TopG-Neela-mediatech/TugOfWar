@@ -71,13 +71,6 @@ namespace tmkoc.threeinarow
             RotateRaysLoop(loseRaysT, 8f, false);
         }
 
-        /// <summary>A tie: both sides celebrated. Uses the lose panel (friendly, encouraging) and replays the same level.</summary>
-        public void ShowDraw()
-        {
-            Show(losePanel, () => GameManager.Instance.LevelManager.RetryLevel());
-            RotateRaysLoop(loseRaysT, 8f, false);
-        }
-
         private void Show(RectTransform panel, Action onHidden)
         {
             activePanel = panel;

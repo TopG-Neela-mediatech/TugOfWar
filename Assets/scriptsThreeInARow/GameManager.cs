@@ -39,14 +39,12 @@ namespace tmkoc.threeinarow
         #region Events
         public event Action OnLevelWin;
         public event Action OnLevelLose;
-        public event Action OnLevelDraw;
         public event Action OnLevelStart;
         public event Action OnLevelReset;
         public void InvokeLevelReset() => OnLevelReset?.Invoke();
         public void InvokeLevelStart() => OnLevelStart?.Invoke();
         public void InvokeLevelWin() => OnLevelWin?.Invoke();
         public void InvokeLevelLose() => OnLevelLose?.Invoke();
-        public void InvokeLevelDraw() => OnLevelDraw?.Invoke();
         #endregion
     }
 }

@@ -13,12 +13,16 @@ namespace tmkoc.threeinarow
         [Header("BOARD")]
         [Tooltip("Optional board plate behind the 3x3 squares.")]
         public Sprite board;
-        [Tooltip("An empty square.")]
+        [Tooltip("The # lines drawn over the board plate.")]
+        public Sprite gridLines;
+        [Tooltip("Optional: a visible empty square. Leave empty for plain tap areas on the board.")]
         public Sprite emptySquare;
 
         [Header("FACE MARKERS (placed inside a square)")]
         public Sprite tapuFace;
         public Sprite petFace;
+        [Tooltip("Used instead of the pet face when Playschool Main says the selected pet is the cat.")]
+        public Sprite petFaceCat;
 
         [Header("CHARACTERS (standing beside the board)")]
         public Sprite tapuCharacter;

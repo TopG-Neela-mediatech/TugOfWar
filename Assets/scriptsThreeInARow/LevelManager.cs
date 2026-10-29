@@ -46,7 +46,6 @@ namespace tmkoc.threeinarow
             GameManager.Instance.OnLevelStart += OnLevelStart;
             GameManager.Instance.OnLevelWin += OnLevelWin;
             GameManager.Instance.OnLevelLose += OnLevelLose;
-            GameManager.Instance.OnLevelDraw += OnLevelDraw;
 
 #if PLAYSCHOOL_MAIN
             // Startup is automatic when launched from the pet room; if it ever needs calling by hand:
@@ -79,25 +78,6 @@ namespace tmkoc.threeinarow
             resultPending = true;
             HelperGameCategoryDataSaver.AddAttempt();
             StartCoroutine(LoadLosePanelWithDelay(resultPanelDelay));
-        }
-        private void OnLevelDraw()
-        {
-            if (resultPending)
-                return;
-            resultPending = true;
-            HelperGameCategoryDataSaver.AddAttempt();
-            StartCoroutine(LoadDrawPanelWithDelay(resultPanelDelay));
-        }
-        private IEnumerator LoadDrawPanelWithDelay(float delay)
-        {
-            yield return new WaitForSeconds(delay);
-            GameManager.Instance.BoardController.HideCelebration();
-#if PLAYSCHOOL_MAIN
-            // A tie scores 0; the pet panel's retry button replays the same level.
-            if (PetPanelMinGameEndScript.ShowRetry(RetryLevel, 0))
-                yield break;
-#endif
-            GameManager.Instance.EndPanelScript.ShowDraw();
         }
         private IEnumerator LoadWinPanelWithDelay(float delay)
         {
@@ -193,7 +173,6 @@ namespace tmkoc.threeinarow
             GameManager.Instance.OnLevelStart -= OnLevelStart;
             GameManager.Instance.OnLevelWin -= OnLevelWin;
             GameManager.Instance.OnLevelLose -= OnLevelLose;
-            GameManager.Instance.OnLevelDraw -= OnLevelDraw;
         }
     }
 }

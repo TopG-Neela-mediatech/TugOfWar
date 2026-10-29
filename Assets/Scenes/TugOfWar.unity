@@ -3352,6 +3352,8 @@ MonoBehaviour:
   petWinPrefab: {fileID: 8664164403119473043, guid: b2fa7ad560a3099428b9c66a24221025, type: 3}
   playerCelebrationState: PinkuFrontCelebration
   petCelebrationState: DogHappy
+  petWinCatPrefab: {fileID: 1142990011841179986, guid: 1bf14d5ee46ff6d4da69db44386c675f, type: 3}
+  petCatCelebrationState: CatHappy
   fitScale: 0.85
   hideOnWin:
   - {fileID: 1009683824}

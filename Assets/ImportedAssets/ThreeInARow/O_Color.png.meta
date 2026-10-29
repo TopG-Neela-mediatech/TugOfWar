@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 2ea0ce0dde50c62488c437f3b7bb9510
+guid: 367f3076870bbf643b783f0689dd45bb
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 2734002142287333395
-    second: three2_intro_0
+      213: 1381501510690504159
+    second: O_Color_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -46,7 +46,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: three2_intro_0
+      name: O_Color_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 1920
-        height: 1080
+        x: 226
+        y: 215
+        width: 571
+        height: 594
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 318813a867021f520800000000000000
-      internalID: 2734002142287333395
+      spriteID: fdd7f51fd441c2310800000000000000
+      internalID: 1381501510690504159
       vertices: []
       indices: 
       edges: []
@@ -151,7 +151,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 5e97eb03825dee720800000000000000
     internalID: 0
     vertices: []
     indices: 
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      three2_intro_0: 2734002142287333395
+      O_Color_0: 1381501510690504159
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

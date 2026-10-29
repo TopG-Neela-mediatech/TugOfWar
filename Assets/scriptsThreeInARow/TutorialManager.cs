@@ -98,6 +98,34 @@ namespace tmkoc.threeinarow
             loop.SetLoops(-1, LoopType.Restart);
         }
 
+        /// <summary>One quick tap on the square, then the hand fades away (the level-start nudge).</summary>
+        public void TapOnce(RectTransform target)
+        {
+            if (hand == null || target == null) return;
+            KillTweens();
+            IsVisible = true;
+            SetActive(true);
+
+            var parent = (RectTransform)hand.parent;
+            hand.anchoredPosition = (Vector2)parent.InverseTransformPoint(target.position) + handOffset;
+            hand.localScale = Vector3.one;
+            if (ripple != null) ripple.anchoredPosition = -handOffset;
+            Vector2 rest = hand.anchoredPosition;
+            float half = tapDuration * 0.5f;
+
+            if (group != null) group.alpha = 0f;
+            loop = DOTween.Sequence().SetTarget(hand);
+            if (group != null) loop.Append(group.DOFade(1f, 0.2f));
+            loop.Append(hand.DOAnchorPosY(rest.y - pressDistance, half).SetEase(Ease.OutQuad));
+            loop.Join(hand.DOScale(pressScale, half).SetEase(Ease.OutQuad));
+            loop.AppendCallback(PlayRipple);
+            loop.Append(hand.DOAnchorPosY(rest.y, half).SetEase(Ease.InQuad));
+            loop.Join(hand.DOScale(1f, half).SetEase(Ease.InQuad));
+            loop.AppendInterval(0.25f);
+            if (group != null) loop.Append(group.DOFade(0f, 0.2f));
+            loop.OnComplete(Hide);
+        }
+
         public void Hide()
         {
             IsVisible = false;

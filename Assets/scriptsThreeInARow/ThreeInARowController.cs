@@ -8,7 +8,7 @@ namespace tmkoc.threeinarow
     /// <summary>
     /// Three in a Row game flow: Observe board -> player taps a square -> face pops -> pet thinks and answers -> repeat
     /// until three matching faces make a line (win / lose) or the board is full (draw).
-    /// LevelManager starts it through BeginLevel(); the result goes back through GameManager.InvokeLevelWin/Lose/Draw.
+    /// LevelManager starts it through BeginLevel(); a win or running out of lives goes back through GameManager.InvokeLevelWin / InvokeLevelLose.
     /// </summary>
     public class ThreeInARowController : MonoBehaviour
     {
@@ -19,6 +19,11 @@ namespace tmkoc.threeinarow
         [SerializeField] private WinLineView winLine;
         [SerializeField] private SideCharacter tapu;
         [SerializeField] private SideCharacter pet;
+
+        [Header("Lives")]
+        [SerializeField] private int maxLives = 3;
+        [Tooltip("Seconds the result is shown before the next round starts (after a lost or drawn round).")]
+        [SerializeField] private float roundRestartDelay = 3f;
 
         [Header("Timing")]
         [SerializeField] private float introTime = 2.4f;
@@ -31,6 +36,7 @@ namespace tmkoc.threeinarow
         private readonly Mark[] board = new Mark[9];
         private ThreeLevelConfig cfg;
         private int currentLevel;
+        private int lives;
         private bool isFinalLevel;
         private bool firstTurn;
         private float idleTimer;
@@ -70,6 +76,13 @@ namespace tmkoc.threeinarow
         private void ResetState()
         {
             if (flow != null) { StopCoroutine(flow); flow = null; }
+            ClearBoard();
+            State = MatchState.Idle;
+        }
+
+        // The board only (lives are kept): used between rounds of the same level.
+        private void ClearBoard()
+        {
             for (int i = 0; i < board.Length; i++) board[i] = Mark.None;
             foreach (var c in cells) if (c != null) c.Clear();
             if (winLine != null) winLine.Hide();
@@ -78,7 +91,6 @@ namespace tmkoc.threeinarow
             if (pet != null) pet.Idle();
             Tut(t => t.Hide());
             hinting = false;
-            State = MatchState.Idle;
         }
 
         public void BeginLevel(int levelIndex, ThreeLevelConfig config, bool finalLevel, bool retry)
@@ -89,6 +101,8 @@ namespace tmkoc.threeinarow
             isFinalLevel = finalLevel;
             turnsPlayed = 0;
             firstTurn = true;
+            lives = Mathf.Max(1, maxLives);
+            ui.SetLives(lives, false);
             State = MatchState.Intro;
 
             Tut(t => t.BeginLevel(levelIndex));
@@ -118,12 +132,11 @@ namespace tmkoc.threeinarow
             tapu.Nod();
             pet.Idle();
 
-            bool tutorialTurn = firstTurn && currentLevel == 0;
-            if (tutorialTurn)
-            {
+            // every level opens with one quick tap on the centre square; the idle hint logic takes over after that
+            if (firstTurn) Tut(t => t.TapOnce(cells[4].Rect));
+
+            if (firstTurn && currentLevel == 0)
                 Sound(s => s.PlayVoice(VoiceId.Tutorial));
-                Tut(t => { if (t.ShowsOnFirstTurn) t.ShowAt(cells[4].Rect); });
-            }
             else
             {
                 ui.ShowBanner("Your turn!", 1.2f);
@@ -140,6 +153,7 @@ namespace tmkoc.threeinarow
             Tut(t => t.Hide());
             ui.HideBanner();
             Place(index, Mark.Tapu);
+            cells[index].PlayHighlight();
             Sound(s => s.PlaySfx(SfxId.TapuPop));
             if (UnityEngine.Random.value < 0.45f) Sound(s => s.PlayVoice(VoiceId.Placed, VoicePriority.Low));
             turnsPlayed++;
@@ -277,7 +291,6 @@ namespace tmkoc.threeinarow
                         s.PlaySfx(SfxId.Victory, 1f, 1f, 0.3f);
                         s.PlayVoice(isFinalLevel ? VoiceId.FinalWin : VoiceId.Win, VoicePriority.High, 0.35f, currentLevel);
                     });
-                    GameManager.Instance.InvokeLevelWin();
                     break;
 
                 case RoundResult.Pet:
@@ -290,7 +303,6 @@ namespace tmkoc.threeinarow
                         s.PlaySfx(SfxId.Lose, 1f, 1f, 0.3f);
                         s.PlayVoice(VoiceId.Lose, VoicePriority.High, 0.5f, currentLevel);
                     });
-                    GameManager.Instance.InvokeLevelLose();
                     break;
 
                 default:   // draw
@@ -303,10 +315,38 @@ namespace tmkoc.threeinarow
                         s.PlaySfx(SfxId.Draw);
                         s.PlayVoice(VoiceId.Draw, VoicePriority.High, 0.35f);
                     });
-                    GameManager.Instance.InvokeLevelDraw();
                     break;
             }
+
+            if (result == RoundResult.Tapu)
+            {
+                // a win: the win panel comes up, and the game restarts from there
+                GameManager.Instance.InvokeLevelWin();
+                flow = null;
+                yield break;
+            }
+
+            // a lost or drawn round costs a life
+            lives = Mathf.Max(0, lives - 1);
+            yield return new WaitForSeconds(0.5f);
+            ui.SetLives(lives, true);
+
+            if (lives <= 0)
+            {
+                // out of lives: the lose panel comes up, and the game restarts from there
+                GameManager.Instance.InvokeLevelLose();
+                flow = null;
+                yield break;
+            }
+
+            ui.ShowBanner(lives == 1 ? "1 life left!" : lives + " lives left!", 0f);
+            yield return new WaitForSeconds(roundRestartDelay);
+
+            // next round on a clean board, same level
+            ClearBoard();
+            if (winLine != null) winLine.Hide();
             flow = null;
+            StartPlayerTurn();
         }
 
         // Winning squares glow + bounce together, and a bright line connects them.

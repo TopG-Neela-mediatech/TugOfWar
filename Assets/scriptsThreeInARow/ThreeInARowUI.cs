@@ -21,6 +21,11 @@ namespace tmkoc.threeinarow
         [SerializeField] private Image tapuBadgeGlow;
         [SerializeField] private Image petBadgeGlow;
 
+        [Header("Lives")]
+        [Tooltip("One heart per life, left to right. The last one is lost first.")]
+        [SerializeField] private Image[] hearts;
+        [SerializeField] private Color lostHeartColor = new Color(0.35f, 0.35f, 0.4f, 0.45f);
+
         [Header("Banner")]
         [SerializeField] private RectTransform banner;
         [SerializeField] private TMP_Text bannerText;
@@ -53,6 +58,48 @@ namespace tmkoc.threeinarow
         }
 
         private void OnDestroy() => DOTween.Kill(Id);
+
+        // ------------------------------------------------------------------ Lives
+
+        /// <param name="lives">Lives left (0..hearts.Length). With animate, the heart that was just lost pops and greys out.</param>
+        public void SetLives(int lives, bool animate)
+        {
+            if (hearts == null) return;
+            for (int i = 0; i < hearts.Length; i++)
+            {
+                var h = hearts[i];
+                if (h == null) continue;
+                var rt = h.rectTransform;
+                rt.DOKill();
+                h.DOKill();
+                bool alive = i < lives;
+                if (alive)
+                {
+                    h.color = Color.white;
+                    rt.localScale = Vector3.one;
+                    rt.localRotation = Quaternion.identity;
+                    continue;
+                }
+
+                bool justLost = animate && h.color.a > 0.9f;
+                if (!justLost)
+                {
+                    h.color = lostHeartColor;
+                    rt.localScale = Vector3.one * 0.8f;
+                    rt.localRotation = Quaternion.identity;
+                    continue;
+                }
+
+                // the lost heart: a big pop and shake, then it greys out and shrinks
+                var s = DOTween.Sequence().SetId(Id);
+                s.Append(rt.DOScale(1.6f, 0.18f).SetEase(Ease.OutQuad));
+                s.Join(rt.DOLocalRotate(new Vector3(0, 0, 18f), 0.18f));
+                s.Append(rt.DOShakeAnchorPos(0.35f, 14f, 24));
+                s.Append(rt.DOScale(0.8f, 0.25f).SetEase(Ease.InBack));
+                s.Join(rt.DOLocalRotate(Vector3.zero, 0.25f));
+                s.Join(h.DOColor(lostHeartColor, 0.25f));
+            }
+        }
 
         // ------------------------------------------------------------------ Board
 

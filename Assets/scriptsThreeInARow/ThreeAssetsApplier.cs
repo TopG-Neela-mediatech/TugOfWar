@@ -14,6 +14,7 @@ namespace tmkoc.threeinarow
 
         [Header("Targets")]
         [SerializeField] private Image boardPlate;
+        [SerializeField] private Image gridImage;
         [SerializeField] private CellView[] cells;
         [SerializeField] private SideCharacter tapu;
         [SerializeField] private SideCharacter pet;
@@ -36,7 +37,28 @@ namespace tmkoc.threeinarow
                 boardPlate.preserveAspect = true;
                 boardPlate.color = Color.white;
             }
-            foreach (var c in cells) if (c != null) c.ApplyArt(a.emptySquare, a.tapuFace, a.petFace);
+            if (a.gridLines != null && gridImage != null)
+            {
+                gridImage.sprite = a.gridLines;
+                gridImage.type = Image.Type.Simple;
+                gridImage.preserveAspect = true;
+                gridImage.color = Color.white;
+            }
+            Sprite petFace = a.petFace;
+#if PLAYSCHOOL_MAIN
+            PetType selectedPet = PlayroomSaveService.GetSelectedPet();
+
+            if (selectedPet == PetType.Cat)
+            {
+                // Handle the cat activity.
+                if (a.petFaceCat != null) petFace = a.petFaceCat;
+            }
+            else
+            {
+                // handle the dog
+            }
+#endif
+            foreach (var c in cells) if (c != null) c.ApplyArt(a.emptySquare, a.tapuFace, petFace);
             if (tapu != null) tapu.ApplyArt(a.tapuCharacter);
             if (pet != null) pet.ApplyArt(a.petCharacter);
             if (winLine != null) winLine.ApplyArt(a.winLine);

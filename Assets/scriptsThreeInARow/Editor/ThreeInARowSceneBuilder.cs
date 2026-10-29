@@ -25,16 +25,31 @@ namespace tmkoc.threeinarow.EditorTools
         private const string FredokaPath = "Assets/APIs/PlayschoolFonts/Fredoka/TMP_Fredoka/Fredoka-Regular SDF.asset";
         private const string WinLosePrefab = "Assets/Prefabs/WinLose.prefab";
         private const string BackButtonSprite = "Assets/ImportedAssets/NewUI 1/NewUI/BackButton.png";
-        private const string BgSprite = "Assets/ImportedAssets/0MainAssets/BG 2.jpg";
+        private const string ArtFolder = "Assets/ImportedAssets/ThreeInARow/";
+        private const string BgSprite = ArtFolder + "Bg.png";
+        private const string BoardSprite = ArtFolder + "Board.png";
+        private const string GridSprite = ArtFolder + "Cross.png";
+        private const string ShadowSprite = ArtFolder + "Shadow.png";
         private const string TugAssetsPath = "Assets/ScriptableObjects/AssetsSO.asset";
         private const string PinkuIcon = "Assets/ImportedAssets/NewUI 1/NewUI/Pinku_Icon.png";
         private const string DogIcon = "Assets/ImportedAssets/NewUI 1/NewUI/Dog_Icon.png";
+        private const string CatIcon = "Assets/ImportedAssets/NewUI 1/NewUI/Cat_Icon.png";
+        private const string CatRig = "Assets/Scenes/Characters/Prefabs/Animals/Cat_Rig.prefab";
+        private const string HighlightPrefab = "Assets/AssetKits/ParticleImage/Demo/Prefabs/Highlight.prefab";
+        private const string HeartSprite = "Assets/AssetKits/ParticleImage/Demo/Sprites/Heart.png";
         private const string ConfettiPrefab = "Assets/Prefabs/TugConfetti.prefab";
         private const string PinkuRig = "Assets/Scenes/Characters/Prefabs/Pinku/Pinku_Front.prefab";
         private const string DogRig = "Assets/Scenes/Characters/Prefabs/Animals/Dog_Rig.prefab";
 
-        private const float CellSize = 230f;
-        private const float CellGap = 22f;
+        // Layout measured from the reference mock-up (Ref.png, 1920x1080): board plate 940, # lines 718 (native size),
+        // squares 239, X / O glyph about 175 px (the sprites are 1024 px with padding, so the image is drawn at 320).
+        private const float BoardSize = 940f;
+        private const float GridSize = 718f;
+        // Measured from Cross.png: the # lines are 36 px thick with centres 254 px apart (x = 231.5 and 485.5 of 718),
+        // so every cell is 254 px and the tile / glow fit between the lines.
+        private const float CellSize = 254f;
+        private const float TileInset = 20f;                 // 254 - 2*20 = 214 px: clear of the 36 px lines
+        private const float FaceSize = 180f;                 // Pinku / pet icons sit inside the 214 px tile
         private static readonly Color Violet = new Color(0.27f, 0.11f, 0.55f);
 
         private static Sprite square, circle;
@@ -88,25 +103,41 @@ namespace tmkoc.threeinarow.EditorTools
 
             // ------------------------------------------------------------ Background (replace the sprite in the editor)
             var bg = MakeImage(canvasRt, "BG", new Color(0.62f, 0.85f, 0.97f));
-            Stretch(bg.rectTransform);
+            Anchor(bg.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1920f, 1080f));
+            var bgFit = bg.gameObject.AddComponent<AspectRatioFitter>();   // fills the screen on every aspect ratio, never stretched
+            bgFit.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
+            bgFit.aspectRatio = 1920f / 1080f;
             var bgSprite = AssetDatabase.LoadAssetAtPath<Sprite>(BgSprite);   // the Tug Battle background
             if (bgSprite != null) { bg.sprite = bgSprite; bg.type = Image.Type.Simple; bg.preserveAspect = false; bg.color = Color.white; }
 
+            // ------------------------------------------------------------ Fit root: the 1920x1080 design area, kept on screen on every device
+            var fitRoot = NewUI("FitRoot", canvasRt);
+            Anchor(fitRoot, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1920f, 1080f));
+            fitRoot.gameObject.AddComponent<SafeAreaFit>();
+
             // ------------------------------------------------------------ Game
-            var game = NewUI("ThreeGame", canvasRt);
+            var game = NewUI("ThreeGame", fitRoot);
             Stretch(game);
 
-            float boardSize = CellSize * 3 + CellGap * 4;
             var board = NewUI("Board", game);
-            Anchor(board, new Vector2(0.5f, 0.5f), new Vector2(0, -25), new Vector2(boardSize, boardSize));
-            var plate = MakeImage(board, "BoardPlate", new Color(0.99f, 0.93f, 0.72f));
+            Anchor(board, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(BoardSize, BoardSize));
+            var plate = MakeImage(board, "BoardPlate", Color.white);
             Stretch(plate.rectTransform);
+            var plateSprite = AssetDatabase.LoadAssetAtPath<Sprite>(BoardSprite);
+            if (plateSprite != null) { plate.sprite = plateSprite; plate.type = Image.Type.Simple; plate.preserveAspect = true; }
+            else plate.color = new Color(0.99f, 0.93f, 0.72f);
+
+            var grid = MakeImage(board, "GridLines", Color.white);
+            Anchor(grid.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(GridSize, GridSize));
+            var gridSprite = AssetDatabase.LoadAssetAtPath<Sprite>(GridSprite);
+            if (gridSprite != null) { grid.sprite = gridSprite; grid.type = Image.Type.Simple; grid.preserveAspect = true; }
+            else grid.color = new Color(0.72f, 0.3f, 0.05f, 0.9f);
 
             var cells = new CellView[9];
             for (int i = 0; i < 9; i++)
             {
                 int row = i / 3, col = i % 3;
-                var pos = new Vector2((col - 1) * (CellSize + CellGap), (1 - row) * (CellSize + CellGap));
+                var pos = new Vector2((col - 1) * CellSize, (1 - row) * CellSize);
                 cells[i] = BuildCell(board, i, pos);
             }
 
@@ -116,13 +147,17 @@ namespace tmkoc.threeinarow.EditorTools
             Set(winLine, "bar", bar);
 
             // Pinku and the Dog: the animated rigs from Tug Battle, fitted into these rects (bottoms on the same line)
-            var tapuView = BuildSideCharacter(game, "Tapu", new Vector2(-690, -90), new Vector2(380, 540), new Color(1f, 0.7f, 0.3f), 1f,
+            var shadowSprite = AssetDatabase.LoadAssetAtPath<Sprite>(ShadowSprite);
+            BuildShadow(game, "TapuShadow", new Vector2(-620, -365), new Vector2(270, 54), shadowSprite);
+            BuildShadow(game, "PetShadow", new Vector2(640, -425), new Vector2(300, 54), shadowSprite);
+
+            var tapuView = BuildSideCharacter(game, "Tapu", new Vector2(-620, -75), new Vector2(420, 600), new Color(1f, 0.7f, 0.3f), 1f,
                 PinkuRig, false, "PinkuFrontIdle", "PinkuFrontCelebration", "");
-            var petView = BuildSideCharacter(game, "Pet", new Vector2(690, -195), new Vector2(400, 330), new Color(0.97f, 0.55f, 0.6f), -1f,
+            var petView = BuildSideCharacter(game, "Pet", new Vector2(650, -235), new Vector2(440, 380), new Color(0.97f, 0.55f, 0.6f), -1f,
                 DogRig, true, "DogIdle", "DogHappy", "DogSadIdle");
 
             // ------------------------------------------------------------ Back button (Playschool)
-            var backImg = MakeImage(canvasRt, "PlayschoolBackButton", Color.white);
+            var backImg = MakeImage(fitRoot, "PlayschoolBackButton", Color.white);
             var backSprite = AssetDatabase.LoadAssetAtPath<Sprite>(BackButtonSprite);
             if (backSprite != null) { backImg.sprite = backSprite; backImg.type = Image.Type.Simple; backImg.preserveAspect = true; }
             else backImg.color = new Color(0.9f, 0.4f, 0.4f);
@@ -135,7 +170,7 @@ namespace tmkoc.threeinarow.EditorTools
             backImg.rectTransform.sizeDelta = new Vector2(125f, 125f);
 
             // ------------------------------------------------------------ HUD
-            var hud = NewUI("ThreeHUD", canvasRt);
+            var hud = NewUI("ThreeHUD", fitRoot);
             Stretch(hud);
             var ui = hud.gameObject.AddComponent<ThreeInARowUI>();
 
@@ -143,12 +178,23 @@ namespace tmkoc.threeinarow.EditorTools
             var petBadge = BuildBadge(hud, "PetBadge", "Pet", new Vector2(690, 330), new Color(1f, 0.6f, 0.65f), out var petGlow);
 
             var banner = MakeImage(hud, "Banner", new Color(1f, 1f, 1f, 0.92f));
-            Anchor(banner.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0, 470), new Vector2(560, 110));
+            Anchor(banner.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0, 507), new Vector2(520, 60));
             var bannerGroup = banner.gameObject.AddComponent<CanvasGroup>();
             bannerGroup.interactable = false; bannerGroup.blocksRaycasts = false;
-            var bannerText = MakeText(banner.rectTransform, "Text", "Your turn!", 64, Violet, new Vector2(520, 90));
+            var bannerText = MakeText(banner.rectTransform, "Text", "Your turn!", 44, Violet, new Vector2(500, 52));
             Stretch(bannerText.rectTransform, 12f);
             banner.gameObject.SetActive(false);
+
+            // lives: three hearts, top right
+            var heartSprite = AssetDatabase.LoadAssetAtPath<Sprite>(HeartSprite);
+            var hearts = new Image[3];
+            for (int i = 0; i < hearts.Length; i++)
+            {
+                hearts[i] = MakeImage(hud, "Heart" + (i + 1), Color.white);
+                if (heartSprite != null) { hearts[i].sprite = heartSprite; hearts[i].type = Image.Type.Simple; hearts[i].preserveAspect = true; }
+                else hearts[i].color = new Color(1f, 0.3f, 0.4f);
+                Anchor(hearts[i].rectTransform, new Vector2(0.5f, 0.5f), new Vector2(640 + i * 90, 488), new Vector2(76, 76));
+            }
 
             // confetti: the same ParticleImage prefab as Tug Battle (shower + burst)
             ParticleImageRefs confetti = default;
@@ -193,6 +239,7 @@ namespace tmkoc.threeinarow.EditorTools
             Set(ui, "banner", banner.rectTransform);
             Set(ui, "bannerText", bannerText);
             Set(ui, "bannerGroup", bannerGroup);
+            SetArray(ui, "hearts", hearts);
             Set(ui, "confettiShower", confetti.shower);
             Set(ui, "confettiBurst", confetti.burst);
 
@@ -218,6 +265,7 @@ namespace tmkoc.threeinarow.EditorTools
 
             Set(applier, "gameManager", gm);
             Set(applier, "boardPlate", plate);
+            Set(applier, "gridImage", grid);
             SetArray(applier, "cells", cells);
             Set(applier, "tapu", tapuView);
             Set(applier, "pet", petView);
@@ -251,28 +299,56 @@ namespace tmkoc.threeinarow.EditorTools
 
         private static CellView BuildCell(Transform board, int index, Vector2 pos)
         {
-            var sq = MakeImage(board, "Cell" + index, new Color(1f, 1f, 1f, 0.95f));
-            Anchor(sq.rectTransform, new Vector2(0.5f, 0.5f), pos, new Vector2(CellSize, CellSize));
-            sq.raycastTarget = true;
-            var btn = sq.gameObject.AddComponent<Button>();
-            btn.targetGraphic = sq;
+            // the cell itself is an invisible tap area on the # grid
+            var root = MakeImage(board, "Cell" + index, new Color(1f, 1f, 1f, 0f));
+            Anchor(root.rectTransform, new Vector2(0.5f, 0.5f), pos, new Vector2(CellSize, CellSize));
+            root.raycastTarget = true;
+            var btn = root.gameObject.AddComponent<Button>();
+            btn.targetGraphic = root;
             btn.transition = Selectable.Transition.None;
 
-            var glow = MakeImage(sq.rectTransform, "Glow", new Color(1f, 0.95f, 0.45f, 0f));
-            Stretch(glow.rectTransform, -14f);
+            // the tile: the cell colour (clear until someone plays here), inset so the # lines stay visible
+            var tile = MakeImage(root.rectTransform, "Tile", new Color(1f, 1f, 1f, 0f));
+            Stretch(tile.rectTransform, TileInset);
+
+            var glow = MakeImage(root.rectTransform, "Glow", new Color(1f, 0.95f, 0.45f, 0f));
+            Stretch(glow.rectTransform, TileInset);
             glow.gameObject.SetActive(false);
 
-            var face = MakeImage(sq.rectTransform, "Face", Color.white);
+            var face = MakeImage(root.rectTransform, "Face", Color.white);
             face.sprite = circle; face.type = Image.Type.Simple; face.preserveAspect = true;
-            Anchor(face.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(CellSize * 0.78f, CellSize * 0.78f));
+            Anchor(face.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(FaceSize, FaceSize));
             face.gameObject.SetActive(false);
 
-            var view = sq.gameObject.AddComponent<CellView>();
+            // the AssetKits Highlight particle image, played over the cell when the player puts a face here
+            AssetKits.ParticleImage.ParticleImage highlight = null;
+            var hp = AssetDatabase.LoadAssetAtPath<GameObject>(HighlightPrefab);
+            if (hp != null)
+            {
+                var inst = (GameObject)PrefabUtility.InstantiatePrefab(hp, root.rectTransform);
+                inst.name = "Highlight";
+                var hrt = (RectTransform)inst.transform;
+                hrt.anchorMin = hrt.anchorMax = new Vector2(0.5f, 0.5f);
+                hrt.anchoredPosition = Vector2.zero;
+                hrt.localScale = Vector3.one * 1.6f;   // the prefab scatters sparkles around its centre; keep them near the cell
+                highlight = inst.GetComponent<AssetKits.ParticleImage.ParticleImage>();
+            }
+
+            var view = root.gameObject.AddComponent<CellView>();
             Set(view, "button", btn);
-            Set(view, "square", sq);
+            Set(view, "tile", tile);
             Set(view, "face", face);
             Set(view, "glow", glow);
+            Set(view, "highlight", highlight);
             return view;
+        }
+
+        private static void BuildShadow(Transform parent, string name, Vector2 pos, Vector2 size, Sprite sprite)
+        {
+            var img = MakeImage(parent, name, new Color(1f, 1f, 1f, 0.5f));
+            if (sprite != null) { img.sprite = sprite; img.type = Image.Type.Simple; img.preserveAspect = false; }
+            else img.color = new Color(0f, 0f, 0f, 0.25f);
+            Anchor(img.rectTransform, new Vector2(0.5f, 0.5f), pos, size);
         }
 
         private struct ParticleImageRefs
@@ -295,6 +371,11 @@ namespace tmkoc.threeinarow.EditorTools
             SetString(view, "idleState", idle);
             SetString(view, "winState", win);
             SetString(view, "sadState", sad);
+            if (name == "Pet")   // Playschool Main: the cat rig is used when the selected pet is the cat
+            {
+                SetBool(view, "isPet", true);
+                Set(view, "catRigPrefab", AssetDatabase.LoadAssetAtPath<GameObject>(CatRig));
+            }
             return view;
         }
 
@@ -353,11 +434,14 @@ namespace tmkoc.threeinarow.EditorTools
                 AssetDatabase.CreateAsset(so, AssetsPath);
             }
 
-            // Empty slots are filled with Tug Battle art: Pinku's and the dog's round icons for the face markers
-            // (the dog's Tug faces are biting the rope), and the tutorial hand.
+            // The ThreeInARow art folder: board plate and # lines. The cell faces are Pinku's, the dog's and the cat's round icons;
+            // the tutorial hand comes from Tug Battle.
             var tug = AssetDatabase.LoadAssetAtPath<tmkoc.tugofwar.AssetsSO>(TugAssetsPath);
-            if (so.tapuFace == null) so.tapuFace = AssetDatabase.LoadAssetAtPath<Sprite>(PinkuIcon);
-            if (so.petFace == null) so.petFace = AssetDatabase.LoadAssetAtPath<Sprite>(DogIcon);
+            so.board = AssetDatabase.LoadAssetAtPath<Sprite>(BoardSprite);
+            so.gridLines = AssetDatabase.LoadAssetAtPath<Sprite>(GridSprite);
+            so.tapuFace = AssetDatabase.LoadAssetAtPath<Sprite>(PinkuIcon);
+            so.petFace = AssetDatabase.LoadAssetAtPath<Sprite>(DogIcon);
+            so.petFaceCat = AssetDatabase.LoadAssetAtPath<Sprite>(CatIcon);
             if (so.tutorialHand == null && tug != null) so.tutorialHand = tug.tutorialHand;
             EditorUtility.SetDirty(so);
             AssetDatabase.SaveAssets();

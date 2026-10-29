@@ -26,6 +26,17 @@ namespace tmkoc.threeinarow
         [SerializeField] private string winState = "";
         [SerializeField] private string sadState = "";
 
+        [Header("Pet selection (Playschool Main only)")]
+        [Tooltip("Tick on the Pet: the rig / animations switch to the cat when the player's selected pet is the cat.")]
+        [SerializeField] private bool isPet;
+        [SerializeField] private GameObject catRigPrefab;
+        [SerializeField] private string catIdleState = "CatIdle";
+        [SerializeField] private string catWinState = "CatHappy";
+        [SerializeField] private string catSadState = "CatSadIdle";
+
+        // the animator states of whichever rig is in use (dog / Pinku by default, cat when the cat is selected)
+        private string curIdle, curWin, curSad;
+
         private RectTransform Rt => (RectTransform)transform;
         private string TweenId => "side" + GetInstanceID();
         private Vector2 rest;
@@ -57,9 +68,10 @@ namespace tmkoc.threeinarow
 
         private void BuildRig()
         {
-            if (rigPrefab == null || rig != null) return;
-            rig = Instantiate(rigPrefab, Rt);
-            rig.name = rigPrefab.name + " (Rig)";
+            var prefab = PickRig();
+            if (prefab == null || rig != null) return;
+            rig = Instantiate(prefab, Rt);
+            rig.name = prefab.name + " (Rig)";
             var t = rig.transform;
             t.localPosition = Vector3.zero;
             t.localRotation = Quaternion.identity;
@@ -71,6 +83,31 @@ namespace tmkoc.threeinarow
             foreach (Transform child in transform) if (child.gameObject != rig) child.gameObject.SetActive(false);
 
             Fit();
+        }
+
+        // The rig for this character: the default one, or the cat when Playschool Main says the selected pet is the cat.
+        private GameObject PickRig()
+        {
+            curIdle = idleState; curWin = winState; curSad = sadState;
+#if PLAYSCHOOL_MAIN
+            if (isPet && catRigPrefab != null)
+            {
+                PetType pet = PlayroomSaveService.GetSelectedPet();
+
+                if (pet == PetType.Cat)
+                {
+                    // Handle the cat activity.
+                    curIdle = catIdleState; curWin = catWinState; curSad = catSadState;
+                    return catRigPrefab;
+                }
+                else
+                {
+                    // handle the dog
+                    return rigPrefab;
+                }
+            }
+#endif
+            return rigPrefab;
         }
 
         // Sprite renderers sit above the canvas content; the rig is scaled to fit this rect and stands on its bottom edge.
@@ -117,7 +154,7 @@ namespace tmkoc.threeinarow
             if (rig == null) return;
             rig.SetActive(true);
             if (rigAnimator == null) return;
-            if (string.IsNullOrEmpty(state)) state = idleState;
+            if (string.IsNullOrEmpty(state)) state = curIdle;
             if (string.IsNullOrEmpty(state) || !rigAnimator.HasState(0, Animator.StringToHash(state))) return;
             rigAnimator.Play(state, 0, 0f);
         }
@@ -125,9 +162,21 @@ namespace tmkoc.threeinarow
         /// <summary>Removes the character (called right before the end panel appears; the rig would draw over it).</summary>
         public void Hide()
         {
+            Cache();
             DOTween.Kill(TweenId);
-            RestPose();
-            if (rig != null) rig.SetActive(false);
+            Rt.anchoredPosition = rest;
+            Rt.localScale = Vector3.one;
+            Rt.localRotation = Quaternion.identity;
+
+            // Throw the rig away instead of just disabling it: a disabled animator keeps the bones in the last pose it left them in,
+            // and the next level would start from that frame. The next pose call builds a fresh rig in its default pose.
+            if (rig != null)
+            {
+                rig.transform.SetParent(null, false);
+                Destroy(rig);
+                rig = null;
+                rigAnimator = null;
+            }
         }
 
         // ------------------------------------------------------------------ Poses
@@ -135,17 +184,17 @@ namespace tmkoc.threeinarow
         private void RestPose()
         {
             Cache();
-            BuildRig();   // first use: after the canvas has been scaled, so the fit is exact
             DOTween.Kill(TweenId);
             Rt.anchoredPosition = rest;
             Rt.localScale = Vector3.one;
             Rt.localRotation = Quaternion.identity;
+            BuildRig();   // first use (or after Hide): at the rest pose and after the canvas has been scaled, so the fit is exact
         }
 
         public void Idle()
         {
             RestPose();
-            PlayClip(idleState);
+            PlayClip(curIdle);
             var s = DOTween.Sequence().SetId(TweenId).SetLoops(-1);
             s.Append(Rt.DOScale(new Vector3(1.015f, 0.985f, 1f), 1.2f).SetEase(Ease.InOutSine));
             s.Append(Rt.DOScale(Vector3.one, 1.2f).SetEase(Ease.InOutSine));
@@ -155,7 +204,7 @@ namespace tmkoc.threeinarow
         public void Nod()
         {
             RestPose();
-            PlayClip(idleState);
+            PlayClip(curIdle);
             var s = DOTween.Sequence().SetId(TweenId);
             s.Append(Rt.DOLocalRotate(new Vector3(0, 0, -5f * facing), 0.15f));
             s.Append(Rt.DOLocalRotate(new Vector3(0, 0, 3f * facing), 0.18f));
@@ -167,7 +216,7 @@ namespace tmkoc.threeinarow
         public void Think()
         {
             RestPose();
-            PlayClip(idleState);
+            PlayClip(curIdle);
             var s = DOTween.Sequence().SetId(TweenId).SetLoops(-1);
             s.Append(Rt.DOLocalRotate(new Vector3(0, 0, 8f * facing), 0.35f).SetEase(Ease.InOutSine));
             s.AppendInterval(0.2f);
@@ -179,7 +228,7 @@ namespace tmkoc.threeinarow
         public void Excited()
         {
             RestPose();
-            PlayClip(winState);
+            PlayClip(curWin);
             var s = DOTween.Sequence().SetId(TweenId);
             for (int i = 0; i < 2; i++)
             {
@@ -193,7 +242,7 @@ namespace tmkoc.threeinarow
         public void Win()
         {
             RestPose();
-            PlayClip(winState);
+            PlayClip(curWin);
             var s = DOTween.Sequence().SetId(TweenId).SetLoops(-1);
             s.Append(Rt.DOAnchorPosY(rest.y + 60f, 0.3f).SetEase(Ease.OutQuad));
             s.Join(Rt.DOScale(new Vector3(0.96f, 1.06f, 1f), 0.3f));
@@ -206,7 +255,7 @@ namespace tmkoc.threeinarow
         public void Surprise()
         {
             RestPose();
-            PlayClip(idleState);
+            PlayClip(curIdle);
             var s = DOTween.Sequence().SetId(TweenId);
             s.Append(Rt.DOScale(1.15f, 0.12f).SetEase(Ease.OutQuad));
             s.Join(Rt.DOAnchorPosY(rest.y + 24f, 0.12f));
@@ -220,7 +269,7 @@ namespace tmkoc.threeinarow
         public void Clap()
         {
             RestPose();
-            PlayClip(winState);
+            PlayClip(curWin);
             var s = DOTween.Sequence().SetId(TweenId).SetLoops(-1);
             s.Append(Rt.DOScale(new Vector3(0.97f, 1.04f, 1f), 0.18f).SetEase(Ease.OutQuad));
             s.Append(Rt.DOScale(new Vector3(1.03f, 0.98f, 1f), 0.18f).SetEase(Ease.InQuad));
@@ -232,7 +281,7 @@ namespace tmkoc.threeinarow
         public void Slump()
         {
             RestPose();
-            PlayClip(sadState);
+            PlayClip(curSad);
             var s = DOTween.Sequence().SetId(TweenId);
             s.Append(Rt.DOAnchorPosY(rest.y - 14f, 0.3f).SetEase(Ease.OutQuad));
             s.Join(Rt.DOScale(new Vector3(1.04f, 0.94f, 1f), 0.3f));
