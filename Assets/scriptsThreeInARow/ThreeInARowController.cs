@@ -26,7 +26,7 @@ namespace tmkoc.threeinarow
         [SerializeField] private float roundRestartDelay = 3f;
 
         [Header("Timing")]
-        [SerializeField] private float introTime = 2.4f;
+        [SerializeField] private float introTime = 1.3f;
         [SerializeField] private float resultCelebrateDelay = 0.35f;
         [SerializeField] private Color tapuLineColor = new Color(1f, 0.82f, 0.2f);
         [SerializeField] private Color petLineColor = new Color(1f, 0.45f, 0.5f);

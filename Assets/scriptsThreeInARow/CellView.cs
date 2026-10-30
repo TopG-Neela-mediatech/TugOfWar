@@ -171,7 +171,11 @@ namespace tmkoc.threeinarow
             highlight.gameObject.SetActive(true);
             highlight.transform.localScale = Vector3.one;
             // the prefab is white and vanishes on the light tiles: tint it (and the particle images under it) light blue
-            foreach (var p in highlight.GetComponentsInChildren<ParticleImage>(true)) p.color = HighlightTint;
+            foreach (var p in highlight.GetComponentsInChildren<ParticleImage>(true))
+            {
+                p.color = HighlightTint;
+                p.raycastTarget = false;   // the effect must never swallow taps meant for the cells
+            }
             highlight.Stop(true);
             highlight.Play();
         }
