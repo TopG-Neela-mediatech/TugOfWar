@@ -39,7 +39,7 @@ namespace tmkoc.tugofwar
         {
             if (levelConfigs == null || levelConfigs.Length == 0) levelConfigs = TugLevelConfig.CreateDefaults();
             SetDataSaver();
-            playSchoolBackButton.onClick.AddListener(() => SceneManager.LoadScene(TMKOCPlaySchoolConstants.TMKOCPlayMainMenu));
+            playSchoolBackButton.onClick.AddListener(() => SceneManager.LoadScene(TMKOCPlaySchoolConstants.TMKOCPlayRoomScene));
         }
         private void Start()
         {

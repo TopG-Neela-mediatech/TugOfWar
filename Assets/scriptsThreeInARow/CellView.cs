@@ -162,11 +162,16 @@ namespace tmkoc.threeinarow
             s.AppendCallback(StartIdle);
         }
 
+        private static readonly Color HighlightTint = new Color(0.45f, 0.78f, 1f, 1f);
+
         /// <summary>The Highlight particle image bursts over this cell (played when the player places a face).</summary>
         public void PlayHighlight()
         {
             if (highlight == null) return;
             highlight.gameObject.SetActive(true);
+            highlight.transform.localScale = Vector3.one;
+            // the prefab is white and vanishes on the light tiles: tint it (and the particle images under it) light blue
+            foreach (var p in highlight.GetComponentsInChildren<ParticleImage>(true)) p.color = HighlightTint;
             highlight.Stop(true);
             highlight.Play();
         }

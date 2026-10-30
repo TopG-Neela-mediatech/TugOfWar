@@ -22,9 +22,8 @@ namespace tmkoc.threeinarow
         [SerializeField] private Image petBadgeGlow;
 
         [Header("Lives")]
-        [Tooltip("One heart per life, left to right. The last one is lost first.")]
-        [SerializeField] private Image[] hearts;
-        [SerializeField] private Color lostHeartColor = new Color(0.35f, 0.35f, 0.4f, 0.45f);
+        [SerializeField] private Image livesHeart;
+        [SerializeField] private TMP_Text livesText;
 
         [Header("Banner")]
         [SerializeField] private RectTransform banner;
@@ -61,44 +60,26 @@ namespace tmkoc.threeinarow
 
         // ------------------------------------------------------------------ Lives
 
-        /// <param name="lives">Lives left (0..hearts.Length). With animate, the heart that was just lost pops and greys out.</param>
+        /// <param name="lives">Lives left. With animate, the heart pops and shakes and the number ticks down.</param>
         public void SetLives(int lives, bool animate)
         {
-            if (hearts == null) return;
-            for (int i = 0; i < hearts.Length; i++)
-            {
-                var h = hearts[i];
-                if (h == null) continue;
-                var rt = h.rectTransform;
-                rt.DOKill();
-                h.DOKill();
-                bool alive = i < lives;
-                if (alive)
-                {
-                    h.color = Color.white;
-                    rt.localScale = Vector3.one;
-                    rt.localRotation = Quaternion.identity;
-                    continue;
-                }
+            if (livesText != null) livesText.text = lives.ToString();
+            if (livesHeart == null) return;
+            var rt = livesHeart.rectTransform;
+            DOTween.Kill(Id + "heart");
+            rt.localScale = Vector3.one;
+            rt.localRotation = Quaternion.identity;
+            if (!animate) return;
 
-                bool justLost = animate && h.color.a > 0.9f;
-                if (!justLost)
-                {
-                    h.color = lostHeartColor;
-                    rt.localScale = Vector3.one * 0.8f;
-                    rt.localRotation = Quaternion.identity;
-                    continue;
-                }
-
-                // the lost heart: a big pop and shake, then it greys out and shrinks
-                var s = DOTween.Sequence().SetId(Id);
-                s.Append(rt.DOScale(1.6f, 0.18f).SetEase(Ease.OutQuad));
-                s.Join(rt.DOLocalRotate(new Vector3(0, 0, 18f), 0.18f));
-                s.Append(rt.DOShakeAnchorPos(0.35f, 14f, 24));
-                s.Append(rt.DOScale(0.8f, 0.25f).SetEase(Ease.InBack));
-                s.Join(rt.DOLocalRotate(Vector3.zero, 0.25f));
-                s.Join(h.DOColor(lostHeartColor, 0.25f));
-            }
+            var s = DOTween.Sequence().SetId(Id + "heart");
+            s.Append(rt.DOScale(1.5f, 0.18f).SetEase(Ease.OutQuad));
+            s.Join(rt.DOLocalRotate(new Vector3(0, 0, 18f), 0.18f));
+            s.Append(rt.DOShakeAnchorPos(0.55f, new Vector2(22f, 14f), 34, 90f, false, true));
+            s.Join(rt.DOShakeRotation(0.55f, new Vector3(0f, 0f, 30f), 30, 90f, true));
+            if (livesText != null) s.Join(livesText.rectTransform.DOShakeAnchorPos(0.55f, 8f, 30));
+            s.Append(rt.DOScale(1f, 0.25f).SetEase(Ease.OutBack));
+            s.Join(rt.DOLocalRotate(Vector3.zero, 0.25f));
+            if (livesText != null) s.Join(livesText.rectTransform.DOPunchScale(Vector3.one * 0.4f, 0.4f));
         }
 
         // ------------------------------------------------------------------ Board
@@ -109,6 +90,16 @@ namespace tmkoc.threeinarow
             boardRoot.DOKill();
             boardRoot.localScale = Vector3.one * 0.2f;
             boardRoot.DOScale(1f, 0.55f).SetEase(Ease.OutBack).SetId(Id);
+        }
+
+        /// <summary>A short shake of the whole board (draw / the pet won).</summary>
+        public void ShakeBoard()
+        {
+            if (boardRoot == null) return;
+            DOTween.Kill(Id + "shake");
+            boardRoot.DOShakeAnchorPos(0.5f, new Vector2(22f, 14f), 24, 90f, false, true)
+                .SetId(Id + "shake")
+                .OnKill(() => boardRoot.anchoredPosition = Vector2.zero);
         }
 
         // ------------------------------------------------------------------ Turn indicators

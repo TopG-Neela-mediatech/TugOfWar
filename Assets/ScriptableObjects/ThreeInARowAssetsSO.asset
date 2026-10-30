@@ -15,9 +15,9 @@ MonoBehaviour:
   board: {fileID: 21300000, guid: b032a9a44897b5940af785e302734724, type: 3}
   gridLines: {fileID: 21300000, guid: 40f195e0aeb1a344d9b668bcf1a0bc65, type: 3}
   emptySquare: {fileID: 0}
-  tapuFace: {fileID: -2134140110334163522, guid: 29600410dc427ef478c53ec901d0f117, type: 3}
-  petFace: {fileID: 1235752080043875, guid: aa939b4fad69fc947bd590827cbf5be4, type: 3}
-  petFaceCat: {fileID: -914626797486946170, guid: c8e93eb2f8f494147a0dbaefeabd0f7f, type: 3}
+  tapuFace: {fileID: 21300000, guid: b3988d332666e7e42b5438b12077a5eb, type: 3}
+  petFace: {fileID: 21300000, guid: d62dcda54d6426a4cbc93c17bfc7ccf8, type: 3}
+  petFaceCat: {fileID: 21300000, guid: dc0eb6a90a35cfa478e8ff0c36a08d38, type: 3}
   tapuCharacter: {fileID: 0}
   petCharacter: {fileID: 0}
   winLine: {fileID: 0}

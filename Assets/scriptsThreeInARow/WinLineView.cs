@@ -45,6 +45,8 @@ namespace tmkoc.threeinarow
             Vector2 a = parent.InverseTransformPoint(from.position);
             Vector2 b = parent.InverseTransformPoint(to.position);
             Vector2 dir = b - a;
+            float k = Mathf.Max(0.1f, parent.rect.width / 940f);   // the board is resized to fit the screen; thickness and overshoot follow it
+            float thickness = this.thickness * k, overshoot = this.overshoot * k;
             float length = dir.magnitude + overshoot * 2f;
             float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
 

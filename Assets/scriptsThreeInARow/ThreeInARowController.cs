@@ -283,7 +283,7 @@ namespace tmkoc.threeinarow
                 case RoundResult.Tapu:
                     Celebrate(line, tapuLineColor);
                     tapu.Win();
-                    pet.Surprise();
+                    pet.Idle();
                     ui.Confetti(70);
                     Sound(s =>
                     {
@@ -296,7 +296,8 @@ namespace tmkoc.threeinarow
                 case RoundResult.Pet:
                     Celebrate(line, petLineColor);
                     pet.Win();
-                    tapu.Slump();
+                    tapu.Idle();
+                    ui.ShakeBoard();
                     Sound(s =>
                     {
                         s.PlaySfx(SfxId.WinLine);
@@ -307,9 +308,9 @@ namespace tmkoc.threeinarow
 
                 default:   // draw
                     for (int i = 0; i < cells.Length; i++) cells[i].DrawCelebrate(i * 0.06f);
-                    tapu.Clap();
-                    pet.Clap();
-                    ui.Confetti(25);
+                    tapu.Idle();
+                    pet.Idle();
+                    ui.ShakeBoard();
                     Sound(s =>
                     {
                         s.PlaySfx(SfxId.Draw);

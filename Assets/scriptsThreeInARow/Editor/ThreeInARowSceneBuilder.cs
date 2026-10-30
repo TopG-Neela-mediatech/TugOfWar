@@ -24,19 +24,20 @@ namespace tmkoc.threeinarow.EditorTools
         private const string AssetsPath = "Assets/ScriptableObjects/ThreeInARowAssetsSO.asset";
         private const string FredokaPath = "Assets/APIs/PlayschoolFonts/Fredoka/TMP_Fredoka/Fredoka-Regular SDF.asset";
         private const string WinLosePrefab = "Assets/Prefabs/WinLose.prefab";
-        private const string BackButtonSprite = "Assets/ImportedAssets/NewUI 1/NewUI/BackButton.png";
+        private const string BackButtonSprite = "Assets/ImportedAssets/NewUI 2/BackButton.png";
         private const string ArtFolder = "Assets/ImportedAssets/ThreeInARow/";
         private const string BgSprite = ArtFolder + "Bg.png";
         private const string BoardSprite = ArtFolder + "Board.png";
         private const string GridSprite = ArtFolder + "Cross.png";
         private const string ShadowSprite = ArtFolder + "Shadow.png";
         private const string TugAssetsPath = "Assets/ScriptableObjects/AssetsSO.asset";
-        private const string PinkuIcon = "Assets/ImportedAssets/NewUI 1/NewUI/Pinku_Icon.png";
-        private const string DogIcon = "Assets/ImportedAssets/NewUI 1/NewUI/Dog_Icon.png";
-        private const string CatIcon = "Assets/ImportedAssets/NewUI 1/NewUI/Cat_Icon.png";
+        private const string PinkuIcon = "Assets/ImportedAssets/NewUI 2/Pinku_Icon.png";
+        private const string DogIcon = "Assets/ImportedAssets/NewUI 2/Dog_Icon.png";
+        private const string CatIcon = "Assets/ImportedAssets/NewUI 2/Cat_Icon.png";
         private const string CatRig = "Assets/Scenes/Characters/Prefabs/Animals/Cat_Rig.prefab";
         private const string HighlightPrefab = "Assets/AssetKits/ParticleImage/Demo/Prefabs/Highlight.prefab";
-        private const string HeartSprite = "Assets/AssetKits/ParticleImage/Demo/Sprites/Heart.png";
+        private const string LivesPillSprite = "Assets/ImportedAssets/NewUI 2/button.png";
+        private const string HeartSprite = "Assets/ImportedAssets/NewUI 2/lifebutton.png";
         private const string ConfettiPrefab = "Assets/Prefabs/TugConfetti.prefab";
         private const string PinkuRig = "Assets/Scenes/Characters/Prefabs/Pinku/Pinku_Front.prefab";
         private const string DogRig = "Assets/Scenes/Characters/Prefabs/Animals/Dog_Rig.prefab";
@@ -110,10 +111,9 @@ namespace tmkoc.threeinarow.EditorTools
             var bgSprite = AssetDatabase.LoadAssetAtPath<Sprite>(BgSprite);   // the Tug Battle background
             if (bgSprite != null) { bg.sprite = bgSprite; bg.type = Image.Type.Simple; bg.preserveAspect = false; bg.color = Color.white; }
 
-            // ------------------------------------------------------------ Fit root: the 1920x1080 design area, kept on screen on every device
+            // ------------------------------------------------------------ Fit root: fills the canvas; ThreeInARowLayout anchors everything inside it
             var fitRoot = NewUI("FitRoot", canvasRt);
-            Anchor(fitRoot, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1920f, 1080f));
-            fitRoot.gameObject.AddComponent<SafeAreaFit>();
+            Stretch(fitRoot);
 
             // ------------------------------------------------------------ Game
             var game = NewUI("ThreeGame", fitRoot);
@@ -148,12 +148,12 @@ namespace tmkoc.threeinarow.EditorTools
 
             // Pinku and the Dog: the animated rigs from Tug Battle, fitted into these rects (bottoms on the same line)
             var shadowSprite = AssetDatabase.LoadAssetAtPath<Sprite>(ShadowSprite);
-            BuildShadow(game, "TapuShadow", new Vector2(-620, -365), new Vector2(270, 54), shadowSprite);
-            BuildShadow(game, "PetShadow", new Vector2(640, -425), new Vector2(300, 54), shadowSprite);
+            BuildShadow(game, "TapuShadow", new Vector2(-745, -365), new Vector2(270, 54), shadowSprite);
+            BuildShadow(game, "PetShadow", new Vector2(740, -425), new Vector2(300, 54), shadowSprite);
 
-            var tapuView = BuildSideCharacter(game, "Tapu", new Vector2(-620, -75), new Vector2(420, 600), new Color(1f, 0.7f, 0.3f), 1f,
+            var tapuView = BuildSideCharacter(game, "Tapu", new Vector2(-745, -75), new Vector2(420, 600), new Color(1f, 0.7f, 0.3f), 1f,
                 PinkuRig, false, "PinkuFrontIdle", "PinkuFrontCelebration", "");
-            var petView = BuildSideCharacter(game, "Pet", new Vector2(650, -235), new Vector2(440, 380), new Color(0.97f, 0.55f, 0.6f), -1f,
+            var petView = BuildSideCharacter(game, "Pet", new Vector2(745, -235), new Vector2(440, 380), new Color(0.97f, 0.55f, 0.6f), -1f,
                 DogRig, true, "DogIdle", "DogHappy", "DogSadIdle");
 
             // ------------------------------------------------------------ Back button (Playschool)
@@ -166,35 +166,33 @@ namespace tmkoc.threeinarow.EditorTools
             backBtn.targetGraphic = backImg;
             backImg.rectTransform.anchorMin = backImg.rectTransform.anchorMax = new Vector2(0f, 1f);
             backImg.rectTransform.pivot = new Vector2(0f, 1f);
-            backImg.rectTransform.anchoredPosition = new Vector2(30f, -30f);
-            backImg.rectTransform.sizeDelta = new Vector2(125f, 125f);
+            backImg.rectTransform.anchoredPosition = new Vector2(50f, -35f);
+            backImg.rectTransform.sizeDelta = new Vector2(100f, 100f);
 
             // ------------------------------------------------------------ HUD
             var hud = NewUI("ThreeHUD", fitRoot);
             Stretch(hud);
             var ui = hud.gameObject.AddComponent<ThreeInARowUI>();
 
-            var tapuBadge = BuildBadge(hud, "TapuBadge", "Tapu", new Vector2(-690, 330), new Color(1f, 0.85f, 0.35f), out var tapuGlow);
-            var petBadge = BuildBadge(hud, "PetBadge", "Pet", new Vector2(690, 330), new Color(1f, 0.6f, 0.65f), out var petGlow);
+            // no Tapu / Pet labels and no turn banner: the characters' animations say whose turn it is
 
-            var banner = MakeImage(hud, "Banner", new Color(1f, 1f, 1f, 0.92f));
-            Anchor(banner.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0, 507), new Vector2(520, 60));
-            var bannerGroup = banner.gameObject.AddComponent<CanvasGroup>();
-            bannerGroup.interactable = false; bannerGroup.blocksRaycasts = false;
-            var bannerText = MakeText(banner.rectTransform, "Text", "Your turn!", 44, Violet, new Vector2(500, 52));
-            Stretch(bannerText.rectTransform, 12f);
-            banner.gameObject.SetActive(false);
-
-            // lives: three hearts, top right
+            // lives: a white pill, top right - orange heart + the number of lives left in blue
+            var pill = MakeImage(hud, "LivesPill", Color.white);
+            var pillSprite = AssetDatabase.LoadAssetAtPath<Sprite>(LivesPillSprite);
+            if (pillSprite != null) { pill.sprite = pillSprite; pill.type = Image.Type.Simple; }
+            pill.raycastTarget = false;
+            pill.rectTransform.anchorMin = pill.rectTransform.anchorMax = new Vector2(1f, 1f);
+            pill.rectTransform.pivot = new Vector2(1f, 1f);
+            pill.rectTransform.anchoredPosition = new Vector2(-50f, -35f);
+            pill.rectTransform.sizeDelta = new Vector2(245f, 96f);   // the sprite's own size: white face with a soft shadow underneath
+            var heart = MakeImage(pill.rectTransform, "Heart", Color.white);
             var heartSprite = AssetDatabase.LoadAssetAtPath<Sprite>(HeartSprite);
-            var hearts = new Image[3];
-            for (int i = 0; i < hearts.Length; i++)
-            {
-                hearts[i] = MakeImage(hud, "Heart" + (i + 1), Color.white);
-                if (heartSprite != null) { hearts[i].sprite = heartSprite; hearts[i].type = Image.Type.Simple; hearts[i].preserveAspect = true; }
-                else hearts[i].color = new Color(1f, 0.3f, 0.4f);
-                Anchor(hearts[i].rectTransform, new Vector2(0.5f, 0.5f), new Vector2(640 + i * 90, 488), new Vector2(76, 76));
-            }
+            if (heartSprite != null) { heart.sprite = heartSprite; heart.type = Image.Type.Simple; heart.preserveAspect = true; }
+            else heart.color = new Color(1f, 0.5f, 0f);
+            heart.raycastTarget = false;
+            Anchor(heart.rectTransform, new Vector2(0f, 0.5f), new Vector2(70f, 6f), new Vector2(64f, 64f));
+            var livesText = MakeText(pill.rectTransform, "Count", "3", 56, new Color(0f, 0.47f, 0.82f), new Vector2(90f, 70f));
+            Anchor(livesText.rectTransform, new Vector2(1f, 0.5f), new Vector2(-62f, 6f), new Vector2(90f, 70f));
 
             // confetti: the same ParticleImage prefab as Tug Battle (shower + burst)
             ParticleImageRefs confetti = default;
@@ -232,14 +230,8 @@ namespace tmkoc.threeinarow.EditorTools
 
             // ------------------------------------------------------------ wire
             Set(ui, "boardRoot", board);
-            Set(ui, "tapuBadge", tapuBadge);
-            Set(ui, "petBadge", petBadge);
-            Set(ui, "tapuBadgeGlow", tapuGlow);
-            Set(ui, "petBadgeGlow", petGlow);
-            Set(ui, "banner", banner.rectTransform);
-            Set(ui, "bannerText", bannerText);
-            Set(ui, "bannerGroup", bannerGroup);
-            SetArray(ui, "hearts", hearts);
+            Set(ui, "livesHeart", heart);
+            Set(ui, "livesText", livesText);
             Set(ui, "confettiShower", confetti.shower);
             Set(ui, "confettiBurst", confetti.burst);
 
@@ -273,6 +265,8 @@ namespace tmkoc.threeinarow.EditorTools
             Set(applier, "tutorial", tutorial);
 
             endPanel.transform.SetAsLastSibling();
+
+            ThreeInARowLayout.Apply(canvasRt);   // responsive anchors for the board, characters and HUD
 
             Directory.CreateDirectory("Assets/Scenes");
             EditorSceneManager.SaveScene(scene, ScenePath);
