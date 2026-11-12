@@ -189,16 +189,12 @@ namespace tmkoc.threeinarow
                 if (target < 0) target = BotAI.CompletingSquare(board, Mark.Pet);
             }
 
-            foreach (var c in cells) if (c != null && c.IsEmpty) c.PulseHint(false);
+            // one square lights up (not the whole board): the winning / blocking square, or any free one
+            if (target < 0) target = BotAI.RandomEmpty(board);
             if (target >= 0)
             {
                 cells[target].PulseHint(true);
                 Tut(t => t.ShowAt(cells[target].Rect));
-            }
-            else
-            {
-                int any = BotAI.RandomEmpty(board);
-                if (any >= 0) Tut(t => t.ShowAt(cells[any].Rect));
             }
             Sound(s => s.PlayVoice(VoiceId.Hint));
         }

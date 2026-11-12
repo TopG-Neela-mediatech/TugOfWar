@@ -135,6 +135,18 @@ namespace tmkoc.threeinarow
             float k = Mathf.Min(rectW / b.size.x, rectH / b.size.y) * fitScale;
             // Mirror with a 180 degree turn about Y instead of a negative X scale: a negative scale inverts the skinned sprite meshes' winding,
             // and the rig ends up culled / drawn behind the background.
+            // The sprite shader can be unusable on this platform (an Android bundle opened in the Windows editor): the magenta error shader then
+            // culls mirrored meshes and the rig vanishes. Swap in the built-in sprite shader (double sided) so it shows in its real colours.
+            var shader = renderers[0].sharedMaterial != null ? renderers[0].sharedMaterial.shader : null;
+            if (shader != null && !shader.isSupported)
+            {
+                var fallback = Shader.Find("Sprites/Default");
+                if (fallback != null)
+                {
+                    var mat = new Material(fallback);
+                    foreach (var r in renderers) r.sharedMaterial = mat;
+                }
+            }
             rig.transform.localRotation = flipRig ? Quaternion.Euler(0f, 180f, 0f) : Quaternion.identity;
             rig.transform.localScale = new Vector3(k, k, k);
 
@@ -175,6 +187,7 @@ namespace tmkoc.threeinarow
             // and the next level would start from that frame. The next pose call builds a fresh rig in its default pose.
             if (rig != null)
             {
+                rig.SetActive(false);   // gone this very frame (Destroy only happens at the end of it), so it can never draw over the end panel
                 rig.transform.SetParent(null, false);
                 Destroy(rig);
                 rig = null;

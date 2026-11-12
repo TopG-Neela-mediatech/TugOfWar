@@ -66,7 +66,7 @@ namespace tmkoc.threeinarow
         public string[] yourTurn = { "ticturn1", "ticturn2", "ticturn3" };
         public string[] placed = { "ticplaced1", "ticplaced2", "ticplaced3" };
         public string[] petThinking = { "ticthink1", "ticthink2" };
-        public string[] twoInARow = { "tictwo1", "tictwo2" };
+        public string[] twoInARow = { "tictwo1" };
         public string[] stopPet = { "ticstop1", "ticstop2" };
         public string[] hint = { "tichint1", "tichint2" };
         public LevelLine[] win =
@@ -273,7 +273,7 @@ namespace tmkoc.threeinarow
         public bool IsVoiceBusy => VoiceBusy || hasPending;
 
         // Lines that must never play (also blocked when the scene's serialized mapper still lists them).
-        private static readonly HashSet<string> BlockedKeys = new HashSet<string> { "ticlose1" };
+        private static readonly HashSet<string> BlockedKeys = new HashSet<string> { "ticlose1", "tictwo2" };
 
         private readonly Dictionary<string, List<string>> bags = new Dictionary<string, List<string>>();
         private readonly Dictionary<string, string> lastKey = new Dictionary<string, string>();

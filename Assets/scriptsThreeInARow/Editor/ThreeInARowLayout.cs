@@ -19,8 +19,8 @@ namespace tmkoc.threeinarow
         private const float DesignBoard = 940f;
 
         // character strips and the board slot, as fractions of the canvas
-        private const float TapuLeft = 0.01f, TapuRight = 0.21f, TapuBottom = 0.13f, TapuTop = 0.72f;
-        private const float PetLeft = 0.77f, PetRight = 0.99f, PetBottom = 0.10f, PetTop = 0.50f;
+        private const float TapuLeft = 0.0f, TapuRight = 0.25f, TapuBottom = 0.13f, TapuTop = 0.86f;
+        private const float PetLeft = 0.83f, PetRight = 0.98f, PetBottom = 0.10f, PetTop = 0.40f;
         private const float SlotLeft = 0.22f, SlotRight = 0.78f;
         private const float SlotBottomPx = 40f, SlotTopPx = 110f;   // room under the board / for the banner above it
         private const float CornerMargin = 60f;
@@ -80,7 +80,7 @@ namespace tmkoc.threeinarow
             }
 
             // ---------------------------------------------------------------- Characters, shadows, badges
-            Strip(Find(game, "Tapu"), TapuLeft, TapuRight, TapuBottom, TapuTop);
+            Strip(Find(game, "Pinku") ?? Find(game, "Tapu"), TapuLeft, TapuRight, TapuBottom, TapuTop);
             Strip(Find(game, "Pet"), PetLeft, PetRight, PetBottom, PetTop);
             Point(Find(game, "TapuShadow"), (TapuLeft + TapuRight) * 0.5f, TapuBottom, new Vector2(0f, 6f));
             Point(Find(game, "PetShadow"), (PetLeft + PetRight) * 0.5f, PetBottom, new Vector2(0f, 6f));

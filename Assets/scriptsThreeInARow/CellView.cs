@@ -37,9 +37,54 @@ namespace tmkoc.threeinarow
         private Sprite tapuSprite, petSprite, placeholder;
         private Color glowBase = new Color(1f, 0.95f, 0.45f, 1f);
         private Color emptyTint = new Color(1f, 1f, 1f, 0f);
+        private Sprite emptySprite;
+        private bool spritesCached;
+
+        // A white rounded square (9-sliced) for the owned tile and the hint glow, so their corners are round whatever the tile art is.
+        private static Sprite roundedSprite;
+        private static Sprite RoundedSprite
+        {
+            get
+            {
+                if (roundedSprite != null) return roundedSprite;
+                const int size = 128;
+                const float radius = 34f;
+                var tex = new Texture2D(size, size, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Bilinear };
+                var px = new Color32[size * size];
+                float half = size * 0.5f;
+                for (int y = 0; y < size; y++)
+                    for (int x = 0; x < size; x++)
+                    {
+                        // signed distance to a rounded square, 1px of smoothing for clean edges
+                        float dx = Mathf.Abs(x + 0.5f - half) - (half - radius);
+                        float dy = Mathf.Abs(y + 0.5f - half) - (half - radius);
+                        float d = Mathf.Sqrt(Mathf.Max(dx, 0f) * Mathf.Max(dx, 0f) + Mathf.Max(dy, 0f) * Mathf.Max(dy, 0f)) + Mathf.Min(Mathf.Max(dx, dy), 0f) - radius;
+                        px[y * size + x] = new Color32(255, 255, 255, (byte)(Mathf.Clamp01(0.5f - d) * 255f));
+                    }
+                tex.SetPixels32(px);
+                tex.Apply();
+                roundedSprite = Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f, 0, SpriteMeshType.FullRect, new Vector4(radius + 4, radius + 4, radius + 4, radius + 4));
+                roundedSprite.name = "RoundedSquare";
+                return roundedSprite;
+            }
+        }
+
+        private void CacheSprites()
+        {
+            if (spritesCached) return;
+            spritesCached = true;
+            if (tile != null) emptySprite = tile.sprite;
+            if (glow != null)
+            {
+                glow.sprite = RoundedSprite;
+                glow.type = Image.Type.Sliced;
+                glow.pixelsPerUnitMultiplier = 1f;
+            }
+        }
 
         public void Init(int index, Action<int> clicked)
         {
+            CacheSprites();
             if (placeholder == null && face != null) placeholder = face.sprite;
             Index = index;
             onClick = clicked;
@@ -58,6 +103,8 @@ namespace tmkoc.threeinarow
             petSprite = petFace;
             if (emptySquare != null && tile != null)
             {
+                CacheSprites();
+                emptySprite = emptySquare;
                 tile.sprite = emptySquare;
                 tile.type = Image.Type.Simple;
                 tile.preserveAspect = true;
@@ -81,7 +128,13 @@ namespace tmkoc.threeinarow
             Mark = Mark.None;
             transform.localScale = Vector3.one;
             transform.localRotation = Quaternion.identity;
-            if (tile != null) tile.color = emptyTint;
+            if (tile != null)
+            {
+                CacheSprites();
+                tile.sprite = emptySprite;
+                tile.type = Image.Type.Simple;
+                tile.color = emptyTint;
+            }
             if (face != null)
             {
                 face.gameObject.SetActive(false);
@@ -109,6 +162,10 @@ namespace tmkoc.threeinarow
             // cell colour: a bright flash that settles into Tapu's / the pet's colour
             if (tile != null)
             {
+                CacheSprites();
+                tile.sprite = RoundedSprite;
+                tile.type = Image.Type.Sliced;
+                tile.pixelsPerUnitMultiplier = 1f;
                 tile.color = new Color(1f, 1f, 1f, 0.95f);
                 tile.DOColor(mark == Mark.Tapu ? tapuTint : petTint, 0.4f).SetEase(Ease.OutQuad).SetId(TileId);
             }
