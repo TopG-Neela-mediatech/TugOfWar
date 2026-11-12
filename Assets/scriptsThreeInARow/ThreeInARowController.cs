@@ -44,8 +44,17 @@ namespace tmkoc.threeinarow
         private int turnsPlayed;
         private Coroutine flow;
 
-        private void Start()
+        private const float MaxPetWait = 9f;   // never hold the pet longer than this waiting for voice lines
+        private bool initialized;
+
+        private void Start() => EnsureInit();
+
+        // LevelManager.Start can run before this component's Start (script order differs between a scene loaded from a bundle and one opened
+        // in the editor), so BeginLevel calls this too: the cells must be wired and the board reset exactly once, before the first level begins.
+        private void EnsureInit()
         {
+            if (initialized) return;
+            initialized = true;
             if (GameManager.Instance != null) GameManager.Instance.OnLevelReset += ResetState;
             for (int i = 0; i < cells.Length; i++) if (cells[i] != null) cells[i].Init(i, OnCellClicked);
             ResetState();
@@ -95,6 +104,7 @@ namespace tmkoc.threeinarow
 
         public void BeginLevel(int levelIndex, ThreeLevelConfig config, bool finalLevel, bool retry)
         {
+            EnsureInit();
             ResetState();
             currentLevel = levelIndex;
             cfg = config;
@@ -152,10 +162,10 @@ namespace tmkoc.threeinarow
             ClearHints();
             Tut(t => t.Hide());
             ui.HideBanner();
+            Sound(s => s.StopVoice());   // cut the previous line (hint, "your turn") as soon as the player acts
             Place(index, Mark.Tapu);
             cells[index].PlayHighlight();
             Sound(s => s.PlaySfx(SfxId.TapuPop));
-            if (UnityEngine.Random.value < 0.45f) Sound(s => s.PlayVoice(VoiceId.Placed, VoicePriority.Low));
             turnsPlayed++;
 
             if (!Evaluate(Mark.Tapu)) flow = StartCoroutine(PetTurnRoutine());
@@ -210,9 +220,20 @@ namespace tmkoc.threeinarow
             ui.ShowBanner("Pet is thinking...", 0f);
             tapu.Idle();
             pet.Think();
-            Sound(s => s.PlayVoice(VoiceId.PetThinking, VoicePriority.Low));
 
-            yield return new WaitForSeconds(UnityEngine.Random.Range(cfg.thinkTime.x, cfg.thinkTime.y));
+            // The player's move is praised, then the pet "thinks" out loud; the pet only moves once both lines are done
+            // (or the think time has passed with no audio at all, e.g. the clips are not in the bundle).
+            Sound(s =>
+            {
+                s.PlayVoice(VoiceId.Placed);
+                s.PlayVoice(VoiceId.PetThinking);
+            });
+            float thinkFor = UnityEngine.Random.Range(cfg.thinkTime.x, cfg.thinkTime.y);
+            float started = Time.time;
+            yield return null;   // a queued line starts on the next frame
+            var sm = GameManager.Instance != null ? GameManager.Instance.SoundManager : null;
+            while (Time.time - started < thinkFor || (sm != null && sm.IsVoiceBusy && Time.time - started < MaxPetWait))
+                yield return null;
 
             int move = BotAI.ChoosePetMove(board, cfg);
             ui.HideBanner();
@@ -271,6 +292,7 @@ namespace tmkoc.threeinarow
             Tut(t => t.Hide());
             ui.SetTurn(Mark.None);
             ui.HideBanner();
+            Sound(s => s.StopVoice());   // whatever was still being said (pet thinking, hint, "nice move") is about an earlier moment
             flow = StartCoroutine(ResultRoutine(result, line));
         }
 
@@ -298,11 +320,12 @@ namespace tmkoc.threeinarow
                     pet.Win();
                     tapu.Idle();
                     ui.ShakeBoard();
+                    bool levelLost = lives - 1 <= 0;   // the lose line is about losing the level, not a single round
                     Sound(s =>
                     {
                         s.PlaySfx(SfxId.WinLine);
                         s.PlaySfx(SfxId.Lose, 1f, 1f, 0.3f);
-                        s.PlayVoice(VoiceId.Lose, VoicePriority.High, 0.5f, currentLevel);
+                        if (levelLost) s.PlayVoice(VoiceId.Lose, VoicePriority.High, 0.5f, currentLevel);
                     });
                     break;
 

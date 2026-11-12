@@ -75,7 +75,7 @@ namespace tmkoc.threeinarow
         };
         public LevelLine[] lose =
         {
-            new LevelLine("ticlose1"), new LevelLine("ticlose2"), new LevelLine("ticlose3"), new LevelLine("ticlose4"), new LevelLine("ticlose5")
+            new LevelLine("ticlose2"), new LevelLine("ticlose3"), new LevelLine("ticlose4"), new LevelLine("ticlose5")
         };
         public string[] draw = { "ticdraw1", "ticdraw2", "ticdraw3" };
         public string[] finalWin = { "ticfinal" };
@@ -126,7 +126,6 @@ namespace tmkoc.threeinarow
         private const int SfxVoices = 6;
 
         private readonly Dictionary<SfxId, SfxEntry> sfxMap = new Dictionary<SfxId, SfxEntry>();
-        private readonly Dictionary<VoiceId, int> lastVoiceIndex = new Dictionary<VoiceId, int>();
 
         private AudioSource musicSource;
         private AudioSource[] sfxSources;
@@ -270,16 +269,53 @@ namespace tmkoc.threeinarow
             if (RuntimeAudioLoader.Instance != null) RuntimeAudioLoader.Instance.StopCommonAudioSource();
         }
 
-        // Several keys for one cue = random variation, never the same one twice in a row.
+        /// <summary>True while a line is playing, in its gap, or waiting to start (the game waits on this before the pet moves).</summary>
+        public bool IsVoiceBusy => VoiceBusy || hasPending;
+
+        // Lines that must never play (also blocked when the scene's serialized mapper still lists them).
+        private static readonly HashSet<string> BlockedKeys = new HashSet<string> { "ticlose1" };
+
+        private readonly Dictionary<string, List<string>> bags = new Dictionary<string, List<string>>();
+        private readonly Dictionary<string, string> lastKey = new Dictionary<string, string>();
+
+        // Several keys for one cue play as a shuffled bag: every line is heard once before any repeats, and never the same one twice in a row.
         private string PickKey(VoiceId id, int level)
         {
-            string[] keys = voiceKeys.Get(id, level);
-            if (keys == null || keys.Length == 0) return null;
-            int index = UnityEngine.Random.Range(0, keys.Length);
-            if (keys.Length > 1 && lastVoiceIndex.TryGetValue(id, out int last) && last == index)
-                index = (index + 1) % keys.Length;
-            lastVoiceIndex[id] = index;
-            return keys[index];
+            List<string> pool = new List<string>();
+            string bagName;
+            if (id == VoiceId.Lose)
+            {
+                // the lose lines are for losing the LEVEL, so they are one pool instead of one line per level
+                bagName = "lose";
+                if (voiceKeys.lose != null)
+                    foreach (var l in voiceKeys.lose) if (l != null && l.keys != null) pool.AddRange(l.keys);
+            }
+            else
+            {
+                bagName = id + (id == VoiceId.Win ? "_" + level : "");
+                var keys = voiceKeys.Get(id, level);
+                if (keys != null) pool.AddRange(keys);
+            }
+            pool.RemoveAll(k => string.IsNullOrEmpty(k) || BlockedKeys.Contains(k));
+            if (pool.Count == 0) return null;
+
+            if (!bags.TryGetValue(bagName, out var bag)) bags[bagName] = bag = new List<string>();
+            bag.RemoveAll(k => !pool.Contains(k));
+            if (bag.Count == 0)
+            {
+                bag.AddRange(pool);
+                for (int i = bag.Count - 1; i > 0; i--)   // Fisher-Yates
+                {
+                    int j = UnityEngine.Random.Range(0, i + 1);
+                    (bag[i], bag[j]) = (bag[j], bag[i]);
+                }
+                if (bag.Count > 1 && lastKey.TryGetValue(bagName, out var last) && bag[bag.Count - 1] == last)
+                    (bag[0], bag[bag.Count - 1]) = (bag[bag.Count - 1], bag[0]);   // the next pick is the last element: not a repeat
+            }
+            string key = bag[bag.Count - 1];
+            bag.RemoveAt(bag.Count - 1);
+            lastKey[bagName] = key;
+            return key;
         }
 
         private IEnumerator DuckMusic(float seconds)

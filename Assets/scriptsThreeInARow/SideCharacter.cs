@@ -133,7 +133,10 @@ namespace tmkoc.threeinarow
             float rectW = Vector3.Distance(corners[0], corners[3]);
             float rectH = Vector3.Distance(corners[0], corners[1]);
             float k = Mathf.Min(rectW / b.size.x, rectH / b.size.y) * fitScale;
-            rig.transform.localScale = new Vector3(flipRig ? -k : k, k, k);
+            // Mirror with a 180 degree turn about Y instead of a negative X scale: a negative scale inverts the skinned sprite meshes' winding,
+            // and the rig ends up culled / drawn behind the background.
+            rig.transform.localRotation = flipRig ? Quaternion.Euler(0f, 180f, 0f) : Quaternion.identity;
+            rig.transform.localScale = new Vector3(k, k, k);
 
             b = Measure(renderers);
             Vector3 bottomCentre = (corners[0] + corners[3]) * 0.5f;
