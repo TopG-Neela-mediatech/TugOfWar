@@ -4,7 +4,7 @@ namespace tmkoc.tugofwar
 {
     /// <summary>
     /// The sprites the game needs - kept to the minimum. Leaning, shaking, rope stretch, taps, countdown and prompts are
-    /// all tweens / Fredoka text. Characters are a BODY plus swappable FACES (the face swap is the "animation").
+    /// all tweens / Poppins SemiBold text. Characters are a BODY plus swappable FACES (the face swap is the "animation").
     /// Anything left empty keeps its placeholder. Applied at runtime by TugAssetsApplier (GameManager.Assets).
     /// Scene art (background, ground, win lines, rope, flag) is NOT here: it is whatever you assign on those objects in the
     /// scene, and no script touches it.

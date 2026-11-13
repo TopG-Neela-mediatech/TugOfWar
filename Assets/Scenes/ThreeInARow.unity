@@ -2573,8 +2573,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: TAP
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: eaa45bad409de3b42bd478e0f349b16f, type: 2}
-  m_sharedMaterial: {fileID: -1390732690484961152, guid: eaa45bad409de3b42bd478e0f349b16f, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 750ab65be0bbb8a478a9ecc86c511c46, type: 2}
+  m_sharedMaterial: {fileID: 8916785536254011360, guid: 750ab65be0bbb8a478a9ecc86c511c46, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -4147,8 +4147,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Pinku
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: eaa45bad409de3b42bd478e0f349b16f, type: 2}
-  m_sharedMaterial: {fileID: -1390732690484961152, guid: eaa45bad409de3b42bd478e0f349b16f, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 750ab65be0bbb8a478a9ecc86c511c46, type: 2}
+  m_sharedMaterial: {fileID: 8916785536254011360, guid: 750ab65be0bbb8a478a9ecc86c511c46, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -4579,8 +4579,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Pet
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: eaa45bad409de3b42bd478e0f349b16f, type: 2}
-  m_sharedMaterial: {fileID: -1390732690484961152, guid: eaa45bad409de3b42bd478e0f349b16f, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 750ab65be0bbb8a478a9ecc86c511c46, type: 2}
+  m_sharedMaterial: {fileID: 8916785536254011360, guid: 750ab65be0bbb8a478a9ecc86c511c46, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -5164,8 +5164,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 3
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: eaa45bad409de3b42bd478e0f349b16f, type: 2}
-  m_sharedMaterial: {fileID: -1390732690484961152, guid: eaa45bad409de3b42bd478e0f349b16f, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 750ab65be0bbb8a478a9ecc86c511c46, type: 2}
+  m_sharedMaterial: {fileID: 8916785536254011360, guid: 750ab65be0bbb8a478a9ecc86c511c46, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -5189,7 +5189,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 65.9
+  m_fontSize: 56.95
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1

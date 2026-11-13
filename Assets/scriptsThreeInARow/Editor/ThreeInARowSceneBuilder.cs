@@ -22,7 +22,7 @@ namespace tmkoc.threeinarow.EditorTools
     {
         private const string ScenePath = "Assets/Scenes/ThreeInARow.unity";
         private const string AssetsPath = "Assets/ScriptableObjects/ThreeInARowAssetsSO.asset";
-        private const string FredokaPath = "Assets/APIs/PlayschoolFonts/Fredoka/TMP_Fredoka/Fredoka-Regular SDF.asset";
+        private const string FontPath = "Assets/APIs/PlayschoolFonts/Poppins/Poppins-SemiBold SDF.asset";
         private const string WinLosePrefab = "Assets/Prefabs/WinLose.prefab";
         private const string BackButtonSprite = "Assets/ImportedAssets/NewUI 2/BackButton.png";
         private const string ArtFolder = "Assets/ImportedAssets/ThreeInARow/";
@@ -54,7 +54,7 @@ namespace tmkoc.threeinarow.EditorTools
         private static readonly Color Violet = new Color(0.27f, 0.11f, 0.55f);
 
         private static Sprite square, circle;
-        private static TMP_FontAsset fredoka;
+        private static TMP_FontAsset uiFont;
 
         [MenuItem("Tools/Three In A Row/Build Scene")]
         public static void Build()
@@ -63,7 +63,7 @@ namespace tmkoc.threeinarow.EditorTools
 
             square = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd");
             circle = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
-            fredoka = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FredokaPath);
+            uiFont = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FontPath);
 
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
@@ -498,13 +498,13 @@ namespace tmkoc.threeinarow.EditorTools
             return img;
         }
 
-        /// <summary>Fredoka, no wrapping, auto-sized to fit its box (never larger than <paramref name="size"/>). No outline, no shadow.</summary>
+        /// <summary>Poppins SemiBold, no wrapping, auto-sized to fit its box (never larger than <paramref name="size"/>). No outline, no shadow.</summary>
         private static TextMeshProUGUI MakeText(Transform parent, string name, string text, float size, Color color, Vector2 box)
         {
             var rt = NewUI(name, parent);
             rt.sizeDelta = box;
             var t = rt.gameObject.AddComponent<TextMeshProUGUI>();
-            if (fredoka != null) t.font = fredoka;
+            if (uiFont != null) t.font = uiFont;
             t.text = text;
             t.color = color;
             t.alignment = TextAlignmentOptions.Center;

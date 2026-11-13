@@ -24,7 +24,7 @@ namespace tmkoc.tugofwar.EditorTools
         private const string TapAreaName = "TapArea";
         private const string TutorialName = "TutorialManager";
         private const string AssetsPath = "Assets/ScriptableObjects/AssetsSO.asset";
-        private const string FredokaPath = "Assets/APIs/PlayschoolFonts/Fredoka/TMP_Fredoka/Fredoka-Regular SDF.asset";
+        private const string FontPath = "Assets/APIs/PlayschoolFonts/Poppins/Poppins-SemiBold SDF.asset";
 
         // Canvas pixels (HTML prototype 1600x900 scaled by 1.2 to the 1920x1080 reference)
         private const float WinLineX = 264f;
@@ -36,14 +36,14 @@ namespace tmkoc.tugofwar.EditorTools
 
         private static Sprite square;
         private static Sprite circle;
-        private static TMP_FontAsset fredoka;
+        private static TMP_FontAsset uiFont;
 
         [MenuItem("Tools/Tug Battle/Build Scene")]
         public static void Build()
         {
             square = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd");
             circle = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
-            fredoka = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FredokaPath);
+            uiFont = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FontPath);
 
             if (!EditorUtility.DisplayDialog("Build Tug Battle scene", "This rebuilds TugGame, TugHUD, TapArea and the TutorialManager and discards manual edits made to them (sprites set directly on those objects, deleted objects, etc.). Your AssetsSO, BG and WinLose are kept. Continue?", "Rebuild", "Cancel"))
                 return;
@@ -367,13 +367,13 @@ namespace tmkoc.tugofwar.EditorTools
             return img;
         }
 
-        /// <summary>Fredoka, no wrapping, auto-sized to fit its box (never larger than <paramref name="size"/>).</summary>
+        /// <summary>Poppins SemiBold, no wrapping, auto-sized to fit its box (never larger than <paramref name="size"/>).</summary>
         private static TextMeshProUGUI MakeText(Transform parent, string name, string text, float size, Color color, Vector2 box)
         {
             var rt = NewUI(name, parent);
             rt.sizeDelta = box;
             var t = rt.gameObject.AddComponent<TextMeshProUGUI>();
-            if (fredoka != null) t.font = fredoka;
+            if (uiFont != null) t.font = uiFont;
             t.text = text;
             t.color = color;
             t.alignment = TextAlignmentOptions.Center;

@@ -137,7 +137,9 @@ namespace tmkoc.threeinarow
             State = MatchState.PlayerTurn;
             idleTimer = 0f;
             hinting = false;
-            SetCellsInteractable(true);
+            // the first turn of a level opens with the intro / tutorial voice: the hand shows right away, but taps wait until the line is done
+            if (firstTurn) { SetCellsInteractable(false); flow = StartCoroutine(UnlockAfterVoice()); }
+            else SetCellsInteractable(true);
             ui.SetTurn(Mark.Tapu);
             tapu.Nod();
             pet.Idle();
@@ -153,6 +155,18 @@ namespace tmkoc.threeinarow
                 if (turnsPlayed % 2 == 0) Sound(s => s.PlayVoice(VoiceId.YourTurn, VoicePriority.Low));
             }
             firstTurn = false;
+        }
+
+        private IEnumerator UnlockAfterVoice()
+        {
+            float started = Time.time;
+            yield return null;
+            var sm = GameManager.Instance != null ? GameManager.Instance.SoundManager : null;
+            while (sm != null && sm.IsVoiceBusy && Time.time - started < MaxPetWait) yield return null;
+            flow = null;
+            if (State != MatchState.PlayerTurn) yield break;
+            idleTimer = 0f;
+            SetCellsInteractable(true);
         }
 
         private void OnCellClicked(int index)

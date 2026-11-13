@@ -8,7 +8,7 @@ namespace tmkoc.tugofwar
 {
     /// <summary>
     /// Gameplay HUD: countdown, prompts/banners, floating Good/Great/Super text and the power meter.
-    /// All text is TextMeshPro (Fredoka); everything animates with DOTween.
+    /// All text is TextMeshPro (Poppins SemiBold); everything animates with DOTween.
     /// </summary>
     public class TugBattleUI : MonoBehaviour
     {
