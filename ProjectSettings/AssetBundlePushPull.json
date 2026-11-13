@@ -322,7 +322,7 @@
         },
         {
             "k": "ScriptList",
-            "v": "Assets/Scripts"
+            "v": "Assets/Scripts\nAssets/scriptsThreeInARow"
         }
     ]
 }
